@@ -1,11 +1,6 @@
 package bumblebee.core;
 
-import static org.junit.Assert.*;
-
-import java.awt.List;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
@@ -15,7 +10,6 @@ public class HubTest {
 		Integer position = 0;
 		String namespace = "ns";
 		String collection = "coll";
-		Map<String, Object> data = new HashMap<String, Object>();
 		
 		ArrayReader arrayReader = new ArrayReader(position, namespace, collection);
 		
@@ -23,8 +17,8 @@ public class HubTest {
 		
 		new Hub(arrayReader, applier);
 		
-		arrayReader.insert("first data");
-		arrayReader.insert("second data");
+		arrayReader.onInsert("first data");
+		arrayReader.onInsert("second data");
 		
 		Integer expectedPosition = 2;
 		assertEquals(expectedPosition, applier.lastPosition());
@@ -33,32 +27,25 @@ public class HubTest {
 }
 
 class Hub {
-	private FakeApplier applier;
-
 	public Hub(ArrayReader reader, FakeApplier applier) {
-		this.applier = applier;
-		reader.attach(this);
-	}
-
-	public void onInsert(Integer position, String data) {
-		applier.insert(position, data);
+		reader.attach(applier);
 	}
 }
 
 class ArrayReader {
-	private Hub hub;
 	private Integer position;
+	private FakeApplier applier;
 
 	public ArrayReader(Integer position, String namespace, String collection) {
 		this.position = position;
 	}
 
-	public void attach(Hub hub) {
-		this.hub = hub;
+	public void attach(FakeApplier applier) {
+		this.applier = applier;
 	}
 
-	public void insert(String data) {
-		hub.onInsert(++position, data);
+	public void onInsert(String data) {
+		applier.insert(++position, data);
 	}
 }
 
