@@ -2,11 +2,20 @@ package bumblebee.core;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Test;
 
 public class HubTest {
 
 	@Test public void shouldReplicateInsert() {
+		
+		Map<String, Object> data1 = new HashMap<String, Object>();
+		data1.put("id", 1);
+		Map<String, Object> data2 = new HashMap<String, Object>();
+		data2.put("id", 2);
+		
 		Integer position = 0;
 		String namespace = "ns";
 		String collection = "coll";
@@ -17,46 +26,11 @@ public class HubTest {
 		
 		new Hub(arrayReader, applier);
 		
-		arrayReader.onInsert("first data");
-		arrayReader.onInsert("second data");
+		arrayReader.onInsert(data1);
+		arrayReader.onInsert(data2);
 		
 		Integer expectedPosition = 2;
 		assertEquals(expectedPosition, applier.lastPosition());
 	}
 
-}
-
-class Hub {
-	public Hub(ArrayReader reader, FakeApplier applier) {
-		reader.attach(applier);
-	}
-}
-
-class ArrayReader {
-	private Integer position;
-	private FakeApplier applier;
-
-	public ArrayReader(Integer position, String namespace, String collection) {
-		this.position = position;
-	}
-
-	public void attach(FakeApplier applier) {
-		this.applier = applier;
-	}
-
-	public void onInsert(String data) {
-		applier.insert(++position, data);
-	}
-}
-
-class FakeApplier {
-	private Integer position;
-
-	public Object lastPosition() {
-		return position;
-	}
-
-	public void insert(Integer position, String data) {
-		this.position = position;
-	}	
 }
