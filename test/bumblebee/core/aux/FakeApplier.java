@@ -1,8 +1,10 @@
-package bumblebee.core;
+package bumblebee.core.aux;
 
 import java.util.Map;
 
-class FakeApplier {
+import bumblebee.core.interfaces.Consumer;
+
+public class FakeApplier implements Consumer {
 	private Integer position;
 
 	public Object lastPosition() {

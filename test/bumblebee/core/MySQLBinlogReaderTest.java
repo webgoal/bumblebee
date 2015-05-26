@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import bumblebee.core.reader.MySQLBinlogReader;
 import bumblebee.core.reader.EventListener;
+import bumblebee.core.reader.SchemaManager;
 
 import com.github.shyiko.mysql.binlog.event.TableMapEventData;
 import com.github.shyiko.mysql.binlog.event.WriteRowsEventData;
@@ -25,10 +26,24 @@ public class MySQLBinlogReaderTest {
 			this.lastEvent = event;
 		}
 	}
+	
+	class DummySchemaManager implements SchemaManager {
+		private Map<String, List<String>> tableSchemas = new HashMap<String, List<String>>();
+		LinkedList<String> cols = new LinkedList<String>();		
+		public DummySchemaManager() {
+			cols.add("first_col_name");
+			cols.add("second_col_name");
+			tableSchemas.put("some_table", cols);
+		}
+		@Override public String getColumnName(String tableName, int index) {
+			return tableSchemas.get(tableName).get(index);
+		}
+	}
 
 	@Test public void shouldTransformBinlogEventIntoGenericData() {
 		DummyListener readerx = new DummyListener();
 		MySQLBinlogReader reader = new MySQLBinlogReader(readerx);
+		reader.setSchemaManager(new DummySchemaManager());
 		
 		TableMapEventData tmed = new TableMapEventData();
 		tmed.setTable("some_table");
@@ -53,16 +68,4 @@ public class MySQLBinlogReaderTest {
 		assertEquals(expectedData, readerx.lastEvent.getData());
 	}
 	
-	
-//	  private def onInsert(header: EventHeaderV4, data: WriteRowsEventData) {
-//	    val np = header.getNextPosition
-//	    val id = data.getTableId
-//	    val ti = tablesById.get(id)
-//
-//	    if (doesDbNeedRep(ti, np)) synchronized {
-//	      for (listener <- listeners) {
-//	        listener.onEvent(new RepEvent.Insert(np, ti.get, data))
-//	      }
-//	    }
-//	  }
 }

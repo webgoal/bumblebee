@@ -1,16 +1,19 @@
 package bumblebee.core;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
 
+import bumblebee.core.aux.ArrayReader;
+import bumblebee.core.aux.FakeApplier;
+
+
 public class HubTest {
 
 	@Test public void shouldReplicateInsert() {
-		
 		Map<String, Object> data1 = new HashMap<String, Object>();
 		data1.put("id", 1);
 		Map<String, Object> data2 = new HashMap<String, Object>();
@@ -20,8 +23,7 @@ public class HubTest {
 		String namespace = "ns";
 		String collection = "coll";
 		
-		ArrayReader arrayReader = new ArrayReader(position, namespace, collection);
-		
+		ArrayReader arrayReader = new ArrayReader(position, namespace, collection);		
 		FakeApplier applier = new FakeApplier();
 		
 		new Hub(arrayReader, applier);

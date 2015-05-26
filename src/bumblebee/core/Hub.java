@@ -1,7 +1,10 @@
 package bumblebee.core;
 
+import bumblebee.core.interfaces.Consumer;
+import bumblebee.core.interfaces.Producer;
+
 class Hub {
-	public Hub(ArrayReader reader, FakeApplier applier) {
-		reader.attach(applier);
+	public Hub(Producer producer, Consumer consumer) {
+		producer.attach(consumer);
 	}
 }
