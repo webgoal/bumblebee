@@ -12,8 +12,8 @@ import java.util.Map;
 import org.junit.Test;
 
 import bumblebee.core.interfaces.Consumer;
-import bumblebee.core.reader.MySQLBinlogReader;
-import bumblebee.core.reader.SchemaManager;
+import bumblebee.core.interfaces.MySQLSchemaManager;
+import bumblebee.core.reader.MySQLBinlogAdapter;
 
 import com.github.shyiko.mysql.binlog.event.TableMapEventData;
 import com.github.shyiko.mysql.binlog.event.WriteRowsEventData;
@@ -27,7 +27,7 @@ public class MySQLBinlogReaderTest {
 		}
 	}
 	
-	class DummySchemaManager implements SchemaManager {
+	class DummySchemaManager implements MySQLSchemaManager {
 		private Map<String, List<String>> tableSchemas = new HashMap<String, List<String>>();
 		LinkedList<String> cols = new LinkedList<String>();		
 		public DummySchemaManager() {
@@ -42,7 +42,7 @@ public class MySQLBinlogReaderTest {
 
 	@Test public void shouldTransformBinlogEventIntoGenericData() {
 		DummyListener readerx = new DummyListener();
-		MySQLBinlogReader reader = new MySQLBinlogReader();
+		MySQLBinlogAdapter reader = new MySQLBinlogAdapter();
 		reader.attach(readerx);
 		reader.setSchemaManager(new DummySchemaManager());
 		

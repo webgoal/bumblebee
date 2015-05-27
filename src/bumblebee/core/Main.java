@@ -8,20 +8,24 @@ import java.util.Map;
 
 import bumblebee.core.aux.DummyConsumer;
 import bumblebee.core.interfaces.Consumer;
-import bumblebee.core.reader.MySQLBinlogReader;
-import bumblebee.core.reader.SchemaManager;
+import bumblebee.core.interfaces.MySQLSchemaManager;
+import bumblebee.core.reader.MySQLBinlogAdapter;
+import bumblebee.core.reader.MySQLBinlogConnector;
 
 public class Main {
 	public static void main(String[] args) throws IOException {
 		Consumer consumer = new DummyConsumer();
-		MySQLBinlogReader producer = new MySQLBinlogReader();
+		MySQLBinlogAdapter producer = new MySQLBinlogAdapter();
 		producer.setSchemaManager(new TestSchemaManager());
 		producer.attach(consumer);
-		producer.start();
+		
+		MySQLBinlogConnector connector = new MySQLBinlogConnector();
+		connector.setAdapter(producer);
+		connector.start();
 	}
 }
 
-class TestSchemaManager implements SchemaManager {
+class TestSchemaManager implements MySQLSchemaManager {
 	private Map<String, List<String>> tableSchemas = new HashMap<String, List<String>>();
 	LinkedList<String> cols = new LinkedList<String>();		
 	public TestSchemaManager() {

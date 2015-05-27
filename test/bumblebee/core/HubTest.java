@@ -31,7 +31,7 @@ public class HubTest {
 		arrayReader.doInsert(data1);
 		arrayReader.doInsert(data2);
 		
-		Integer expectedPosition = 2;
+		Long expectedPosition = 2L;
 		assertEquals(expectedPosition, applier.lastPosition());
 	}
 
