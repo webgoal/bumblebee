@@ -1,47 +1,35 @@
 package bumblebee.core;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-import com.github.shyiko.mysql.binlog.BinaryLogClient;
-import com.github.shyiko.mysql.binlog.event.Event;
+import bumblebee.core.aux.DummyConsumer;
+import bumblebee.core.interfaces.Consumer;
+import bumblebee.core.reader.MySQLBinlogReader;
+import bumblebee.core.reader.SchemaManager;
 
 public class Main {
-	private String host     = "192.168.59.103";
-	private String user     = "root";
-	private String pass     = "mypass";
-	private String database = "db1";
-	private Integer port    = 3306;
-	
-	private String binlogFilename = "mysql-bin.000004";
-	private long binlogPosition = 1L;
-	
 	public static void main(String[] args) throws IOException {
-		new Main();
+		Consumer consumer = new DummyConsumer();
+		MySQLBinlogReader producer = new MySQLBinlogReader();
+		producer.setSchemaManager(new TestSchemaManager());
+		producer.attach(consumer);
+		producer.start();
 	}
-	
-	public Main() throws IOException {
-		BinaryLogClient client = new BinaryLogClient(host, port, database, user, pass);
-		client.setBinlogFilename(binlogFilename);
-		client.setBinlogPosition(binlogPosition);
-		client.registerLifecycleListener(new BinaryLogClient.LifecycleListener() {
-			@Override public void onConnect(BinaryLogClient client) {
-				System.out.println("Conectou!");
-			}
-			@Override public void onDisconnect(BinaryLogClient client) {
-				System.out.println("Desconectou!");
-			}
-			@Override public void onEventDeserializationFailure(BinaryLogClient client, Exception ex) {
-				System.out.println("Falha na descerialização!");
-			}
-			@Override public void onCommunicationFailure(BinaryLogClient client, Exception ex) {
-				System.out.println("Falha na comunicação!");
-			}
-		});
-		client.registerEventListener(new BinaryLogClient.EventListener() {
-			@Override public void onEvent(Event event) {
-				System.out.println(event);
-			}
-		});
-		client.connect();
+}
+
+class TestSchemaManager implements SchemaManager {
+	private Map<String, List<String>> tableSchemas = new HashMap<String, List<String>>();
+	LinkedList<String> cols = new LinkedList<String>();		
+	public TestSchemaManager() {
+		cols.add("id");
+		cols.add("name");
+		tableSchemas.put("test", cols);
+	}
+	@Override public String getColumnName(String tableName, int index) {
+		return tableSchemas.get(tableName).get(index);
 	}
 }

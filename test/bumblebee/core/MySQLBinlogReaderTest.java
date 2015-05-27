@@ -11,8 +11,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import bumblebee.core.interfaces.Consumer;
 import bumblebee.core.reader.MySQLBinlogReader;
-import bumblebee.core.reader.EventListener;
 import bumblebee.core.reader.SchemaManager;
 
 import com.github.shyiko.mysql.binlog.event.TableMapEventData;
@@ -20,10 +20,10 @@ import com.github.shyiko.mysql.binlog.event.WriteRowsEventData;
 
 public class MySQLBinlogReaderTest {
 	
-	class DummyListener implements EventListener {
+	class DummyListener implements Consumer {
 		public Event lastEvent;
-		@Override public void onInsert(Event event) {
-			this.lastEvent = event;
+		@Override public void insert(Event event) {
+			lastEvent = event;
 		}
 	}
 	
@@ -42,7 +42,8 @@ public class MySQLBinlogReaderTest {
 
 	@Test public void shouldTransformBinlogEventIntoGenericData() {
 		DummyListener readerx = new DummyListener();
-		MySQLBinlogReader reader = new MySQLBinlogReader(readerx);
+		MySQLBinlogReader reader = new MySQLBinlogReader();
+		reader.attach(readerx);
 		reader.setSchemaManager(new DummySchemaManager());
 		
 		TableMapEventData tmed = new TableMapEventData();

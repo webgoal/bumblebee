@@ -7,8 +7,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import bumblebee.core.aux.ArrayReader;
-import bumblebee.core.aux.FakeApplier;
+import bumblebee.core.aux.ArrayProducer;
+import bumblebee.core.aux.DummyConsumer;
 
 
 public class HubTest {
@@ -19,17 +19,17 @@ public class HubTest {
 		Map<String, Object> data2 = new HashMap<String, Object>();
 		data2.put("id", 2);
 		
-		Integer position = 0;
+		Long position = 0L;
 		String namespace = "ns";
 		String collection = "coll";
 		
-		ArrayReader arrayReader = new ArrayReader(position, namespace, collection);		
-		FakeApplier applier = new FakeApplier();
+		ArrayProducer arrayReader = new ArrayProducer(position, namespace, collection);		
+		DummyConsumer applier = new DummyConsumer();
 		
 		new Hub(arrayReader, applier);
 		
-		arrayReader.onInsert(data1);
-		arrayReader.onInsert(data2);
+		arrayReader.doInsert(data1);
+		arrayReader.doInsert(data2);
 		
 		Integer expectedPosition = 2;
 		assertEquals(expectedPosition, applier.lastPosition());
