@@ -15,8 +15,7 @@ public class MySQLConsumer implements Consumer {
 	private static final Integer port    = 3306;
 	
 
-	@Override
-	public void insert(Event event) {
+	@Override public void insert(Event event) {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			String url  = "jdbc:mysql://" + host + ":" + port + "/" + database;
@@ -31,11 +30,10 @@ public class MySQLConsumer implements Consumer {
 	public String prepareInsertSQL(Event event) {
 		StringBuffer sb = new StringBuffer();
 		sb.append("INSERT INTO ");
-		sb.append(event.getCollection());
+		sb.append(event.getNamespace() + "." + event.getCollection());
 		sb.append(" SET ");
 		event.getData().forEach((k,v) -> sb.append(k + " = '" + v + "', "));
 		sb.replace(sb.length() - 2, sb.length(), ";");
-		System.out.println(sb.toString());
 		return sb.toString();
 	}
 }
