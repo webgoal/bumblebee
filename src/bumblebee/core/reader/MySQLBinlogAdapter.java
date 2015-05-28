@@ -37,6 +37,7 @@ public class MySQLBinlogAdapter implements Producer {
 	public void transformInsert(WriteRowsEventData data) {
 		for (Serializable[] row : data.getRows()) {
 			Event event = new Event();
+			event.setNamespace("db");
 			event.setCollection(tableInfo.get(data.getTableId()));			
 			event.setData(dataToMap(tableInfo.get(data.getTableId()), row));
 			

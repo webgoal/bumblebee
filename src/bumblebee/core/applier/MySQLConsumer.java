@@ -12,12 +12,11 @@ public class MySQLConsumer implements Consumer {
 	private static final String host     = "192.168.59.103";
 	private static final String user     = "root";
 	private static final String pass     = "mypass";
-	private static final String database = "db1";
-	private static final Integer port    = 3306;
+	private static final Integer port    = 3307;
 	private final String url;
 	
 	public MySQLConsumer() {
-		this.url = "jdbc:mysql://" + host + ":" + port + "/" + database;
+		this.url = "jdbc:mysql://" + host + ":" + port;
 	}
 
 	@Override public void insert(Event event) {
@@ -33,6 +32,7 @@ public class MySQLConsumer implements Consumer {
 	}
 
 	private void executeSql(String sql) {
+		System.out.println("SQL: " + sql);
 		try {
 			Connection connection  = DriverManager.getConnection(url, user, pass);
 			Statement stmt = connection.createStatement();

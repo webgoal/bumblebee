@@ -5,3 +5,11 @@ db:
   environment:
     MYSQL_ROOT_PASSWORD: "mypass"
     MYSQL_DATABASE: "mydb"
+
+db2:
+  build: .
+  ports:
+    - "3307:3306"
+  environment:
+    MYSQL_ROOT_PASSWORD: "mypass"
+    MYSQL_DATABASE: "mydb"

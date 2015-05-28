@@ -9,17 +9,16 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 	private static final String host     = "192.168.59.103";
 	private static final String user     = "root";
 	private static final String pass     = "mypass";
-	private static final String database = "db1";
 	private static final Integer port    = 3306;
 	
 	private static final String binlogFilename = "mysql-bin.000003";
-	private static final long   binlogPosition = 2250L;
+	private static final long   binlogPosition = 5199L;
 	
 	private BinaryLogClient client;
 	private MySQLBinlogAdapter producer;
 
 	public MySQLBinlogConnector() {
-		client = new BinaryLogClient(host, port, database, user, pass);
+		client = new BinaryLogClient(host, port, null, user, pass);
 		client.setBinlogFilename(binlogFilename);
 		client.setBinlogPosition(binlogPosition);
 		client.registerLifecycleListener(new BinaryLogClient.LifecycleListener() {
