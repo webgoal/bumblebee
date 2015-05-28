@@ -21,7 +21,7 @@ public class MySQLConsumerTest {
 		event.setCollection("table");
 		event.setData(data);
 
-		assertEquals("INSERT INTO database.table SET id = '1';", consumer.prepareInsertSQL(event));
+		assertEquals("INSERT INTO database.table SET id = '1'", consumer.prepareInsertSQL(event));
 	}
 	
 	@Test public void eventToSQLUpdateTransformationTest() {
@@ -34,7 +34,7 @@ public class MySQLConsumerTest {
 		event.setNamespace("database");
 		event.setCollection("table");
 
-		assertEquals("UPDATE database.table SET id = '1' WHERE id = '2';", consumer.transformEventIntoUpdate(event));
+		assertEquals("UPDATE database.table SET id = '1' WHERE id = '2'", consumer.transformEventIntoUpdate(event));
 	}
 	
 	@Test public void eventToSQLDeleteTransformationTest() {
@@ -45,7 +45,7 @@ public class MySQLConsumerTest {
 		event.setNamespace("database");
 		event.setCollection("table");
 
-		assertEquals("DELETE FROM database.table WHERE id = '2';", consumer.transformEventIntoDelete(event));
+		assertEquals("DELETE FROM database.table WHERE id = '2'", consumer.transformEventIntoDelete(event));
 	}
 
 }

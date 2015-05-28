@@ -9,12 +9,14 @@ import bumblebee.core.reader.MySQLBinlogConnector;
 import bumblebee.core.reader.MySQLSchemaManager;
 
 public class Main {
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, ClassNotFoundException {
+		Class.forName("com.mysql.jdbc.Driver");
+
 		Consumer consumer = new MySQLConsumer();
 		MySQLBinlogAdapter producer = new MySQLBinlogAdapter();
 		producer.setSchemaManager(new MySQLSchemaManager());
 		producer.attach(consumer);
-		
+
 		MySQLBinlogConnector connector = new MySQLBinlogConnector();
 		connector.setAdapter(producer);
 		connector.start();
