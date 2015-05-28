@@ -25,6 +25,12 @@ public class MySQLBinlogReaderTest {
 		@Override public void insert(Event event) {
 			lastEvent = event;
 		}
+		@Override public void update(Event event) {
+			lastEvent = event;
+		}
+		@Override public void delete(Event event) {
+			lastEvent = event;
+		}
 	}
 	
 	class DummySchemaManager implements SchemaManager {

@@ -8,6 +8,7 @@ public class Event {
 	private String namespace;
 	private String collection;
 	private Map<String, Object> data;
+	private Map<String, Object> conditions;
 
 	public void setPosition(Long position) {
 		this.position = position;
@@ -40,10 +41,17 @@ public class Event {
 	public Map<String, Object> getData() {
 		return data;
 	}
+	
+	public void setConditions(Map<String, Object> conditions) {
+		this.conditions = conditions;		
+	}
+	
+	public Map<String, Object> getConditions() {
+		return conditions;
+	}
 
 	@Override public String toString() {
 		return "bumblebee.core.Event [position=" + position + ", namespace=" + namespace
-				+ ", collection=" + collection + ", data=" + data + "]";
+				+ ", collection=" + collection + ", data=" + data + ", conditions="  + conditions+ "]";
 	}
-
 }
