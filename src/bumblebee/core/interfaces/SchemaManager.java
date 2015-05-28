@@ -1,6 +1,6 @@
 package bumblebee.core.interfaces;
 
-public interface MySQLSchemaManager {
+public interface SchemaManager {
 
 	String getColumnName(String tableName, int index);
 

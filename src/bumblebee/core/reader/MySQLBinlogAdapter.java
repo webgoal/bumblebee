@@ -6,8 +6,8 @@ import java.util.Map;
 
 import bumblebee.core.Event;
 import bumblebee.core.interfaces.Consumer;
-import bumblebee.core.interfaces.MySQLSchemaManager;
 import bumblebee.core.interfaces.Producer;
+import bumblebee.core.interfaces.SchemaManager;
 
 import com.github.shyiko.mysql.binlog.event.TableMapEventData;
 import com.github.shyiko.mysql.binlog.event.WriteRowsEventData;
@@ -16,13 +16,13 @@ public class MySQLBinlogAdapter implements Producer {
 	private Consumer consumer;
 	
 	private Map<Long, String> tableInfo = new HashMap<Long, String>();
-	private MySQLSchemaManager schemaManager;
+	private SchemaManager schemaManager;
 	
 	public String getTableById(Long tableId) {
 		return tableInfo.get(tableId);
 	}
 	
-	public void setSchemaManager(MySQLSchemaManager schemaManager) {
+	public void setSchemaManager(SchemaManager schemaManager) {
 		this.schemaManager = schemaManager;
 	}
 	

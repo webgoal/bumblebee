@@ -12,8 +12,8 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 	private static final String database = "db1";
 	private static final Integer port    = 3306;
 	
-	private static final String binlogFilename = "mysql-bin.000004";
-	private static final long   binlogPosition = 4L;
+	private static final String binlogFilename = "mysql-bin.000003";
+	private static final long   binlogPosition = 2250L;
 	
 	private BinaryLogClient client;
 	private MySQLBinlogAdapter producer;

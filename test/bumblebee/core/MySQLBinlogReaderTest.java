@@ -12,7 +12,7 @@ import java.util.Map;
 import org.junit.Test;
 
 import bumblebee.core.interfaces.Consumer;
-import bumblebee.core.interfaces.MySQLSchemaManager;
+import bumblebee.core.interfaces.SchemaManager;
 import bumblebee.core.reader.MySQLBinlogAdapter;
 
 import com.github.shyiko.mysql.binlog.event.TableMapEventData;
@@ -27,7 +27,7 @@ public class MySQLBinlogReaderTest {
 		}
 	}
 	
-	class DummySchemaManager implements MySQLSchemaManager {
+	class DummySchemaManager implements SchemaManager {
 		private Map<String, List<String>> tableSchemas = new HashMap<String, List<String>>();
 		LinkedList<String> cols = new LinkedList<String>();		
 		public DummySchemaManager() {
