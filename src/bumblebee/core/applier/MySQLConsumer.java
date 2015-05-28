@@ -3,9 +3,6 @@ package bumblebee.core.applier;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
-import java.util.Arrays;
-
-import com.mysql.jdbc.StringUtils;
 
 import bumblebee.core.Event;
 import bumblebee.core.interfaces.Consumer;
