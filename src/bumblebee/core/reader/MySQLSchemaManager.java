@@ -19,14 +19,6 @@ public class MySQLSchemaManager implements SchemaManager {
 	private static final String database = "db1";
 	private static final Integer port    = 3306;
 
-	public MySQLSchemaManager() {
-		try {
-			Class.forName("com.mysql.jdbc.Driver");
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-	}
-
 	@Override public String getColumnName(String tableName, int index) {
 		if(!tableSchemas.containsKey(tableName))
 			loadTableSchema(tableName);
@@ -35,6 +27,7 @@ public class MySQLSchemaManager implements SchemaManager {
 
 	private void loadTableSchema(String tableName) {
 		try {
+			Class.forName("com.mysql.jdbc.Driver");
 			String url  = "jdbc:mysql://" + host + ":" + port + "/" + database;
 			Connection connection  = DriverManager.getConnection(url, user, pass);
 			DatabaseMetaData meta = connection.getMetaData();
