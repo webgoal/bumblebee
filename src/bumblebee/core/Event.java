@@ -42,7 +42,7 @@ public class Event {
 		return data;
 	}
 	
-	public void setCondition(Map<String, Object> conditions) {
+	public void setConditions(Map<String, Object> conditions) {
 		this.conditions = conditions;		
 	}
 	

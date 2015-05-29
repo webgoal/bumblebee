@@ -59,6 +59,8 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 			MySQLBinlogConnector.this.producer.transformInsert(event.getData());
 		if (event.getHeader().getEventType() == EventType.EXT_UPDATE_ROWS)
 			MySQLBinlogConnector.this.producer.transformUpdate(event.getData());
+		if (event.getHeader().getEventType() == EventType.EXT_DELETE_ROWS)
+			MySQLBinlogConnector.this.producer.transformDelete(event.getData());
 	}
 
 }
