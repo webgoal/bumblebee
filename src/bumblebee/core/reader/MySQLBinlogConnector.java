@@ -12,7 +12,7 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 	private static final Integer port    = 3306;
 	
 	private static final String binlogFilename = "mysql-bin.000003";
-	private static final long   binlogPosition = 5199L;
+	private static final long   binlogPosition = 2625L;
 	
 	private BinaryLogClient client;
 	private MySQLBinlogAdapter producer;
@@ -29,7 +29,7 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 				System.out.println("Desconectou!");
 			}
 			@Override public void onEventDeserializationFailure(BinaryLogClient client, Exception ex) {
-				System.out.println("Falha na descerialização!");
+				System.out.println("Falha na desserialização!");
 			}
 			@Override public void onCommunicationFailure(BinaryLogClient client, Exception ex) {
 				System.out.println("Falha na comunicação!");
@@ -57,6 +57,8 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 			MySQLBinlogConnector.this.producer.mapTable(event.getData());
 		if (event.getHeader().getEventType() == EventType.EXT_WRITE_ROWS)
 			MySQLBinlogConnector.this.producer.transformInsert(event.getData());
+		if (event.getHeader().getEventType() == EventType.EXT_UPDATE_ROWS)
+			MySQLBinlogConnector.this.producer.transformUpdate(event.getData());
 	}
 
 }

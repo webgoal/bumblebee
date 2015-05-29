@@ -25,7 +25,7 @@ public class MySQLConsumerTest {
 		event.setData(data);
 		
 		conditions.put("id", 2);
-		event.setConditions(conditions);
+		event.setCondition(conditions);
 	}
 
 	@Test public void eventToSQLInsertTransformationTest() {
@@ -34,6 +34,14 @@ public class MySQLConsumerTest {
 	
 	@Test public void eventToSQLUpdateTransformationTest() {
 		assertEquals("UPDATE database.table SET id = '1' WHERE id = '2'", consumer.transformEventIntoUpdate(event));
+	}
+
+	@Test public void eventWithMultipleDataToSQLUpdateTransformationTest() {
+		data.put("name", "actual name");
+		conditions.put("name", "previous name");
+		event.setData(data);
+		event.setCondition(conditions);
+		assertEquals("UPDATE database.table SET name = 'actual name', id = '1' WHERE name = 'previous name' AND id = '2'", consumer.transformEventIntoUpdate(event));
 	}
 	
 	@Test public void eventToSQLDeleteTransformationTest() {

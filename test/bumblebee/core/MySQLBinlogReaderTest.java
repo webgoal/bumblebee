@@ -3,6 +3,8 @@ package bumblebee.core;
 import static org.junit.Assert.assertEquals;
 
 import java.io.Serializable;
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -16,6 +18,7 @@ import bumblebee.core.interfaces.SchemaManager;
 import bumblebee.core.reader.MySQLBinlogAdapter;
 
 import com.github.shyiko.mysql.binlog.event.TableMapEventData;
+import com.github.shyiko.mysql.binlog.event.UpdateRowsEventData;
 import com.github.shyiko.mysql.binlog.event.WriteRowsEventData;
 
 public class MySQLBinlogReaderTest {
@@ -46,7 +49,7 @@ public class MySQLBinlogReaderTest {
 		}
 	}
 
-	@Test public void shouldTransformBinlogEventIntoGenericData() {
+	@Test public void shouldTransformInsertBinlogEventIntoGenericData() {
 		DummyListener readerx = new DummyListener();
 		MySQLBinlogAdapter reader = new MySQLBinlogAdapter();
 		reader.attach(readerx);
@@ -72,6 +75,45 @@ public class MySQLBinlogReaderTest {
 		expectedData.put("second_col_name", "second_col_value");
 		
 		assertEquals("some_table", readerx.lastEvent.getCollection());
+		assertEquals(expectedData, readerx.lastEvent.getData());
+	}
+	
+	@Test public void shouldTransformUpdateBinlogEventIntoGenericData() {
+		DummyListener readerx = new DummyListener();
+		MySQLBinlogAdapter reader = new MySQLBinlogAdapter();
+		reader.attach(readerx);
+		reader.setSchemaManager(new DummySchemaManager());
+		
+		TableMapEventData tmed = new TableMapEventData();
+		tmed.setTable("some_table");
+//		tmed.setDatabase("some_database");
+		tmed.setTableId(2L);
+		reader.mapTable(tmed);
+
+		UpdateRowsEventData wred = new UpdateRowsEventData();
+		wred.setTableId(2L);
+		
+		Serializable[] rowCond = {"first_col_old_value", "second_col_old_value"};
+		Serializable[] rowVal = {"first_col_new_value", "second_col_new_value"};
+		
+		List<Map.Entry<Serializable[], Serializable[]>> rowsz = new ArrayList<Map.Entry<Serializable[], Serializable[]>>();
+		rowsz.add(new AbstractMap.SimpleEntry<Serializable[], Serializable[]>(rowCond, rowVal));
+		
+		wred.setRows(rowsz);
+		wred.setIncludedColumns(BitSet.valueOf(new long[0]));
+		
+		reader.transformUpdate(wred);
+
+		Map<String, Object> expectedCondition = new HashMap<String, Object>();
+		expectedCondition.put("first_col_name", "first_col_old_value");
+		expectedCondition.put("second_col_name", "second_col_old_value");
+		
+		Map<String, Object> expectedData = new HashMap<String, Object>();
+		expectedData.put("first_col_name", "first_col_new_value");
+		expectedData.put("second_col_name", "second_col_new_value");
+		
+		assertEquals("some_table", readerx.lastEvent.getCollection());
+		assertEquals(expectedCondition, readerx.lastEvent.getConditions());
 		assertEquals(expectedData, readerx.lastEvent.getData());
 	}
 	

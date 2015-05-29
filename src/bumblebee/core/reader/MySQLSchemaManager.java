@@ -16,7 +16,7 @@ public class MySQLSchemaManager implements SchemaManager {
 	private static final String host     = "192.168.59.103";
 	private static final String user     = "root";
 	private static final String pass     = "mypass";
-	private static final String database = "db1";
+	private static final String database = "db";
 	private static final Integer port    = 3306;
 
 	@Override public String getColumnName(String tableName, int index) {

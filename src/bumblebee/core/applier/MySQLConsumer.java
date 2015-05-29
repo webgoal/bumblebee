@@ -59,17 +59,17 @@ public class MySQLConsumer implements Consumer {
 	}
 
 	private String fieldsAndValues(Event event) {
-		return serializeMap(event.getData());
+		return serializeMap(event.getData(), ", ");
 	}
 
 	private String conditions(Event event) {
-		return serializeMap(event.getConditions());
+		return serializeMap(event.getConditions(), " AND ");
 	}
-
-	private String serializeMap(Map<String, Object> data) {
+	
+	private String serializeMap(Map<String, Object> data, String glue) {
 		StringBuffer sb = new StringBuffer();
-		data.forEach((k,v) -> sb.append(k + " = '" + v + "', "));
-		sb.replace(sb.length() - 2, sb.length(), "");
+		data.forEach((k,v) -> sb.append(k + " = '" + v + "'" + glue));
+		sb.replace(sb.length() - glue.length(), sb.length(), "");
 		return sb.toString();
 	}
 }
