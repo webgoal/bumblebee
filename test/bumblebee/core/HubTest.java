@@ -9,11 +9,12 @@ import org.junit.Test;
 
 import bumblebee.core.aux.ArrayProducer;
 import bumblebee.core.aux.DummyConsumer;
+import bumblebee.core.exceptions.BusinessException;
 
 
 public class HubTest {
 
-	@Test public void shouldReplicateInsert() {
+	@Test public void shouldReplicateInsert() throws BusinessException {
 		Map<String, Object> data1 = new HashMap<String, Object>();
 		data1.put("id", 1);
 		Map<String, Object> data2 = new HashMap<String, Object>();

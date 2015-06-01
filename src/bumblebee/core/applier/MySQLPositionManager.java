@@ -5,6 +5,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import bumblebee.core.exceptions.BusinessException;
+
 public class MySQLPositionManager {
 	
 	public class LogPosition {
@@ -31,24 +33,23 @@ public class MySQLPositionManager {
 		this.connection = connection;
 	}
 	
-	public LogPosition getCurrentLogPosition() {
+	public LogPosition getCurrentLogPosition() throws BusinessException {
 		try {
 			Statement statement = connection.createStatement();
 			ResultSet query = statement.executeQuery("SELECT binlog_filename, binlog_position FROM db.log_position");
 			query.first();
 			return new LogPosition(query.getString("binlog_filename"), query.getLong("binlog_position"));
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new BusinessException(e);
 		}
-		return null;
 	}
 
-	public void update(String logName, Long logPosition) {
+	public void update(String logName, Long logPosition) throws BusinessException {
 		try {
 			Statement statement = connection.createStatement();
 			statement.executeUpdate(prepareUpdateSQL(logName, logPosition));
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new BusinessException(e);
 		}
 	}
 

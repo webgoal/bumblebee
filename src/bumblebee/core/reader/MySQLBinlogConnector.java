@@ -2,6 +2,8 @@ package bumblebee.core.reader;
 
 import java.io.IOException;
 
+import bumblebee.core.exceptions.BusinessException;
+
 import com.github.shyiko.mysql.binlog.BinaryLogClient;
 import com.github.shyiko.mysql.binlog.event.EventType;
 
@@ -52,15 +54,19 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 	}
 	
 	@Override public void onEvent(com.github.shyiko.mysql.binlog.event.Event event) {
-		System.out.println(event);
-		if (event.getHeader().getEventType() == EventType.TABLE_MAP)
-			MySQLBinlogConnector.this.producer.mapTable(event.getData());
-		if (event.getHeader().getEventType() == EventType.EXT_WRITE_ROWS)
-			MySQLBinlogConnector.this.producer.transformInsert(event.getData());
-		if (event.getHeader().getEventType() == EventType.EXT_UPDATE_ROWS)
-			MySQLBinlogConnector.this.producer.transformUpdate(event.getData());
-		if (event.getHeader().getEventType() == EventType.EXT_DELETE_ROWS)
-			MySQLBinlogConnector.this.producer.transformDelete(event.getData());
+		try {
+			System.out.println(event);
+			if (event.getHeader().getEventType() == EventType.TABLE_MAP)
+				MySQLBinlogConnector.this.producer.mapTable(event.getData());
+			if (event.getHeader().getEventType() == EventType.EXT_WRITE_ROWS)
+				MySQLBinlogConnector.this.producer.transformInsert(event.getData());
+			if (event.getHeader().getEventType() == EventType.EXT_UPDATE_ROWS)
+				MySQLBinlogConnector.this.producer.transformUpdate(event.getData());
+			if (event.getHeader().getEventType() == EventType.EXT_DELETE_ROWS)
+				MySQLBinlogConnector.this.producer.transformDelete(event.getData());
+		} catch (BusinessException ex) {
+			ex.printStackTrace();
+		}
 	}
 
 }

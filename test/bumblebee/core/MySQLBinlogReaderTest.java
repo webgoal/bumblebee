@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.Consumer;
 import bumblebee.core.interfaces.SchemaManager;
 import bumblebee.core.reader.MySQLBinlogAdapter;
@@ -50,7 +51,7 @@ public class MySQLBinlogReaderTest {
 		}
 	}
 
-	@Test public void shouldTransformInsertBinlogEventIntoGenericData() {
+	@Test public void shouldTransformInsertBinlogEventIntoGenericData() throws BusinessException {
 		DummyListener readerx = new DummyListener();
 		MySQLBinlogAdapter reader = new MySQLBinlogAdapter();
 		reader.attach(readerx);
@@ -80,7 +81,7 @@ public class MySQLBinlogReaderTest {
 		assertEquals(expectedData, readerx.lastEvent.getData());
 	}
 
-	@Test public void shouldTransformUpdateBinlogEventIntoGenericData() {
+	@Test public void shouldTransformUpdateBinlogEventIntoGenericData() throws BusinessException {
 		DummyListener readerx = new DummyListener();
 		MySQLBinlogAdapter reader = new MySQLBinlogAdapter();
 		reader.attach(readerx);
@@ -120,7 +121,7 @@ public class MySQLBinlogReaderTest {
 		assertEquals(expectedData, readerx.lastEvent.getData());
 	}
 	
-	@Test public void shouldTransformDeleteBinlogEventIntoGenericData() {
+	@Test public void shouldTransformDeleteBinlogEventIntoGenericData() throws BusinessException {
 		DummyListener readerx = new DummyListener();
 		MySQLBinlogAdapter reader = new MySQLBinlogAdapter();
 		reader.attach(readerx);

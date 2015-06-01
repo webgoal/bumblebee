@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import bumblebee.core.Event;
+import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.Consumer;
 import bumblebee.core.interfaces.Producer;
 import bumblebee.core.interfaces.SchemaManager;
@@ -39,7 +40,7 @@ public class MySQLBinlogAdapter implements Producer {
 		dbInfo.put(data.getTableId(), data.getDatabase());
 	}
 
-	public void transformInsert(WriteRowsEventData data) {
+	public void transformInsert(WriteRowsEventData data) throws BusinessException {
 		for (Serializable[] row : data.getRows()) {
 			Event event = new Event();
 			event.setNamespace(dbInfo.get(data.getTableId()));
@@ -50,7 +51,7 @@ public class MySQLBinlogAdapter implements Producer {
 		}
 	}
 
-	public void transformUpdate(UpdateRowsEventData data) {
+	public void transformUpdate(UpdateRowsEventData data) throws BusinessException {
 		for (Entry<Serializable[], Serializable[]> row : data.getRows()) {
 			Event event = new Event();
 			event.setNamespace(dbInfo.get(data.getTableId()));
@@ -62,7 +63,7 @@ public class MySQLBinlogAdapter implements Producer {
 		}
 	}
 	
-	public void transformDelete(DeleteRowsEventData data) {
+	public void transformDelete(DeleteRowsEventData data) throws BusinessException {
 		for (Serializable[] row : data.getRows()) {
 			Event event = new Event();
 			event.setNamespace(dbInfo.get(data.getTableId()));

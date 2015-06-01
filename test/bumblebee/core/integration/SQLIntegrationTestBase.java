@@ -7,6 +7,8 @@ import java.sql.Statement;
 
 import org.junit.After;
 
+import bumblebee.core.exceptions.BusinessException;
+
 public class SQLIntegrationTestBase {
 
 	private Connection connection = null;
@@ -16,7 +18,7 @@ public class SQLIntegrationTestBase {
 			connection.close();
 	}
 	
-	protected Connection getFakeConnection() {
+	protected Connection getFakeConnection() throws BusinessException {
 		try {
 			connection = DriverManager.getConnection("jdbc:h2:mem:;MODE=MySQL");
 			Statement statement = connection.createStatement();
@@ -25,10 +27,8 @@ public class SQLIntegrationTestBase {
 			statement.executeUpdate("INSERT INTO db.log_position VALUES (1, 'mysql-bin.000001', 4)");
 			return connection;
 		} catch (Exception e) {
-			System.err.println("SQLIntegrationTestBase: Error creating FakeConnection.");
-			e.printStackTrace();
+			throw new BusinessException(e);
 		}
-		return null;
 	}
 
 }

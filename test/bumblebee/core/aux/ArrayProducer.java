@@ -3,6 +3,7 @@ package bumblebee.core.aux;
 import java.util.Map;
 
 import bumblebee.core.Event;
+import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.Consumer;
 import bumblebee.core.interfaces.Producer;
 
@@ -23,7 +24,7 @@ public class ArrayProducer implements Producer {
 		this.consumer = consumer;
 	}
 	
-	public void doInsert(Map<String, Object> data) {
+	public void doInsert(Map<String, Object> data) throws BusinessException {
 		Event event = new Event();
 		event.setPosition(++position);
 		event.setNamespace(namespace);

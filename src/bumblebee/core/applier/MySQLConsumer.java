@@ -6,6 +6,7 @@ import java.sql.Statement;
 import java.util.Map;
 
 import bumblebee.core.Event;
+import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.Consumer;
 
 public class MySQLConsumer implements Consumer {
@@ -19,26 +20,26 @@ public class MySQLConsumer implements Consumer {
 		this.url = "jdbc:mysql://" + host + ":" + port;
 	}
 
-	@Override public void insert(Event event) {
+	@Override public void insert(Event event) throws BusinessException {
 		executeSql(prepareInsertSQL(event));
 	}
 	
-	@Override public void update(Event event) {
+	@Override public void update(Event event) throws BusinessException {
 		executeSql(transformEventIntoUpdate(event));
 	}
 
-	@Override public void delete(Event event) {
+	@Override public void delete(Event event) throws BusinessException {
 		executeSql(transformEventIntoDelete(event));
 	}
 
-	private void executeSql(String sql) {
+	private void executeSql(String sql) throws BusinessException {
 		System.out.println("SQL: " + sql);
 		try {
 			Connection connection  = DriverManager.getConnection(url, user, pass);
 			Statement stmt = connection.createStatement();
 			stmt.executeUpdate(sql);
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new BusinessException(e);
 		}
 	}
 
