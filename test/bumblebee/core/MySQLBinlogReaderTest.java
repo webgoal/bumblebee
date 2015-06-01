@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -77,7 +76,6 @@ public class MySQLBinlogReaderTest {
 		Serializable[] row = {"first_col_value", "second_col_value"};
 		rows.add(row);
 		wred.setRows(rows);
-		wred.setIncludedColumns(BitSet.valueOf(new long[0]));
 		
 		reader.transformInsert(wred, eventHeader());
 
@@ -105,7 +103,6 @@ public class MySQLBinlogReaderTest {
 		rowsz.add(new AbstractMap.SimpleEntry<Serializable[], Serializable[]>(rowCond, rowVal));
 
 		ured.setRows(rowsz);
-		ured.setIncludedColumns(BitSet.valueOf(new long[0]));
 
 		reader.transformUpdate(ured, eventHeader());
 
@@ -135,7 +132,6 @@ public class MySQLBinlogReaderTest {
 		Serializable[] row = {"first_col_value", "second_col_value"};
 		rows.add(row);
 		dred.setRows(rows);
-		dred.setIncludedColumns(BitSet.valueOf(new long[0]));
 
 		reader.transformDelete(dred, eventHeader());
 
