@@ -41,6 +41,14 @@ public class MySQLConsumer implements Consumer {
 	@Override public void setPosition(String logName, long logPosition) throws BusinessException {
 		positionManager.update(logName, logPosition);
 	}
+	
+	@Override public void setPosition(long logPosition) throws BusinessException {
+		positionManager.update(getCurrentLogPosition().getFilename(), logPosition);
+	}
+	
+	@Override public LogPosition getCurrentLogPosition() throws BusinessException {
+		return positionManager.getCurrentLogPosition();
+	}
 
 	private void executeSql(String sql) throws BusinessException {
 		System.out.println("SQL: " + sql);
@@ -82,11 +90,5 @@ public class MySQLConsumer implements Consumer {
 		data.forEach((k,v) -> sb.append(k + " = '" + v + "'" + glue));
 		sb.replace(sb.length() - glue.length(), sb.length(), "");
 		return sb.toString();
-	}
-
-	@Override
-	public LogPosition getCurrentLogPosition() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

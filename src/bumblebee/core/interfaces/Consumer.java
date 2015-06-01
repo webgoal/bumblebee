@@ -9,5 +9,6 @@ public interface Consumer {
 	void update(Event event) throws BusinessException;
 	void delete(Event event) throws BusinessException;
 	void setPosition(String logName, long logPosition) throws BusinessException;
-	LogPosition getCurrentLogPosition(); 
+	void setPosition(long logPosition) throws BusinessException;
+	LogPosition getCurrentLogPosition() throws BusinessException; 
 }

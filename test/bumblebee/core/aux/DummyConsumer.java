@@ -25,7 +25,9 @@ public class DummyConsumer implements Consumer {
 	@Override public void setPosition(String logName, long logPosition) throws BusinessException {
 		this.lastPosition = new LogPosition(logName, logPosition);
 	}
-
+	@Override public void setPosition(long logPosition) throws BusinessException {
+		this.lastPosition = new LogPosition(lastPosition.getFilename(), logPosition);
+	}
 	@Override public LogPosition getCurrentLogPosition() {
 		return lastPosition;
 	}

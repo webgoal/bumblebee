@@ -19,6 +19,7 @@ import bumblebee.core.interfaces.SchemaManager;
 import bumblebee.core.reader.MySQLBinlogAdapter;
 
 import com.github.shyiko.mysql.binlog.event.DeleteRowsEventData;
+import com.github.shyiko.mysql.binlog.event.EventHeaderV4;
 import com.github.shyiko.mysql.binlog.event.RotateEventData;
 import com.github.shyiko.mysql.binlog.event.TableMapEventData;
 import com.github.shyiko.mysql.binlog.event.UpdateRowsEventData;
@@ -41,6 +42,7 @@ public class MySQLBinlogReaderTest {
 
 	@Test public void shouldTransformInsertBinlogEventIntoGenericData() throws BusinessException {
 		DummyConsumer readerx = new DummyConsumer();
+		readerx.setPosition("mysqllog-name", 0L);
 		MySQLBinlogAdapter reader = new MySQLBinlogAdapter();
 		reader.attach(readerx);
 		reader.setSchemaManager(new DummySchemaManager());
@@ -58,7 +60,12 @@ public class MySQLBinlogReaderTest {
 		rows.add(row);
 		wred.setRows(rows);
 		wred.setIncludedColumns(BitSet.valueOf(new long[0]));
-		reader.transformInsert(wred);
+		
+		Long nextPosition = 12L;
+		EventHeaderV4 eventHeader = new EventHeaderV4();
+		eventHeader.setNextPosition(nextPosition);
+		
+		reader.transformInsert(wred, eventHeader);
 
 		Map<String, Object> expectedData = new HashMap<String, Object>();
 		expectedData.put("first_col_name", "first_col_value");
@@ -67,10 +74,13 @@ public class MySQLBinlogReaderTest {
 		assertEquals("some_table", readerx.getLastEvent().getCollection());
 		assertEquals("some_database", readerx.getLastEvent().getNamespace());
 		assertEquals(expectedData, readerx.getLastEvent().getData());
+		assertEquals("mysqllog-name", readerx.getCurrentLogPosition().getFilename());
+		assertEquals(nextPosition, readerx.getCurrentLogPosition().getPosition());
 	}
 
 	@Test public void shouldTransformUpdateBinlogEventIntoGenericData() throws BusinessException {
 		DummyConsumer readerx = new DummyConsumer();
+		readerx.setPosition("mysqllog-name", 0L);
 		MySQLBinlogAdapter reader = new MySQLBinlogAdapter();
 		reader.attach(readerx);
 		reader.setSchemaManager(new DummySchemaManager());
@@ -93,7 +103,11 @@ public class MySQLBinlogReaderTest {
 		ured.setRows(rowsz);
 		ured.setIncludedColumns(BitSet.valueOf(new long[0]));
 
-		reader.transformUpdate(ured);
+		Long nextPosition = 12L;
+		EventHeaderV4 eventHeader = new EventHeaderV4();
+		eventHeader.setNextPosition(nextPosition);
+		
+		reader.transformUpdate(ured, eventHeader);
 
 		Map<String, Object> expectedCondition = new HashMap<String, Object>();
 		expectedCondition.put("first_col_name", "first_col_old_value");
@@ -107,10 +121,13 @@ public class MySQLBinlogReaderTest {
 		assertEquals(expectedCondition, readerx.getLastEvent().getConditions());
 		assertEquals("some_database", readerx.getLastEvent().getNamespace());
 		assertEquals(expectedData, readerx.getLastEvent().getData());
+		assertEquals("mysqllog-name", readerx.getCurrentLogPosition().getFilename());
+		assertEquals(nextPosition, readerx.getCurrentLogPosition().getPosition());
 	}
 	
 	@Test public void shouldTransformDeleteBinlogEventIntoGenericData() throws BusinessException {
 		DummyConsumer readerx = new DummyConsumer();
+		readerx.setPosition("mysqllog-name", 0L);
 		MySQLBinlogAdapter reader = new MySQLBinlogAdapter();
 		reader.attach(readerx);
 		reader.setSchemaManager(new DummySchemaManager());
@@ -129,7 +146,10 @@ public class MySQLBinlogReaderTest {
 		rows.add(row);
 		dred.setRows(rows);
 		dred.setIncludedColumns(BitSet.valueOf(new long[0]));
-		reader.transformDelete(dred);
+		Long nextPosition = 12L;
+		EventHeaderV4 eventHeader = new EventHeaderV4();
+		eventHeader.setNextPosition(nextPosition);
+		reader.transformDelete(dred, eventHeader);
 
 		Map<String, Object> expectedCondition = new HashMap<String, Object>();
 		expectedCondition.put("first_col_name", "first_col_value");
@@ -138,7 +158,8 @@ public class MySQLBinlogReaderTest {
 		assertEquals("some_table", readerx.getLastEvent().getCollection());
 		assertEquals("some_database", readerx.getLastEvent().getNamespace());
 		assertEquals(expectedCondition, readerx.getLastEvent().getConditions());
-		assertEquals(new Long(12L), readerx.getCurrentLogPosition().getPosition());
+		assertEquals("mysqllog-name", readerx.getCurrentLogPosition().getFilename());
+		assertEquals(nextPosition, readerx.getCurrentLogPosition().getPosition());
 	}
 	
 	@Test public void shouldProcessLogRotateEvent() throws BusinessException {
