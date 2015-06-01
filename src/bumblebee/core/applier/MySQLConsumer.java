@@ -6,6 +6,7 @@ import java.sql.Statement;
 import java.util.Map;
 
 import bumblebee.core.Event;
+import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.Consumer;
 
@@ -15,9 +16,14 @@ public class MySQLConsumer implements Consumer {
 	private static final String pass     = "mypass";
 	private static final Integer port    = 3307;
 	private final String url;
+	private MySQLPositionManager positionManager;
 	
 	public MySQLConsumer() {
 		this.url = "jdbc:mysql://" + host + ":" + port;
+	}
+	
+	public void setPositionManager(MySQLPositionManager positionManager) {
+		this.positionManager = positionManager;
 	}
 
 	@Override public void insert(Event event) throws BusinessException {
@@ -30,6 +36,10 @@ public class MySQLConsumer implements Consumer {
 
 	@Override public void delete(Event event) throws BusinessException {
 		executeSql(transformEventIntoDelete(event));
+	}
+	
+	@Override public void setPosition(String logName, long logPosition) throws BusinessException {
+		positionManager.update(logName, logPosition);
 	}
 
 	private void executeSql(String sql) throws BusinessException {
@@ -72,5 +82,11 @@ public class MySQLConsumer implements Consumer {
 		data.forEach((k,v) -> sb.append(k + " = '" + v + "'" + glue));
 		sb.replace(sb.length() - glue.length(), sb.length(), "");
 		return sb.toString();
+	}
+
+	@Override
+	public LogPosition getCurrentLogPosition() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

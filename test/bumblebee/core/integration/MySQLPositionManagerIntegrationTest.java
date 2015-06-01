@@ -12,7 +12,7 @@ import bumblebee.core.applier.MySQLPositionManager;
 import bumblebee.core.exceptions.BusinessException;
 
 
-public class MySQLPositionManagerTest extends SQLIntegrationTestBase {
+public class MySQLPositionManagerIntegrationTest extends SQLIntegrationTestBase {
 	@Rule public ExpectedException assertThrown = ExpectedException.none();
 	
 	@Test public void shouldReturnInitialPosition() throws BusinessException {

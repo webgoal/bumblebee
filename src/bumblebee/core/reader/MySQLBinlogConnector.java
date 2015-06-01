@@ -2,9 +2,12 @@ package bumblebee.core.reader;
 
 import java.io.IOException;
 
+import bumblebee.core.applier.MySQLPositionManager;
+import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.exceptions.BusinessException;
 
 import com.github.shyiko.mysql.binlog.BinaryLogClient;
+import com.github.shyiko.mysql.binlog.event.EventHeaderV4;
 import com.github.shyiko.mysql.binlog.event.EventType;
 
 public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
@@ -54,6 +57,7 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 	}
 	
 	@Override public void onEvent(com.github.shyiko.mysql.binlog.event.Event event) {
+//		LogPosition log = new MySQLPositionManager.LogPosition("lalala", ((EventHeaderV4) event.getHeader()).getNextPosition());
 		try {
 			System.out.println(event);
 			if (event.getHeader().getEventType() == EventType.TABLE_MAP)
@@ -64,6 +68,8 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 				MySQLBinlogConnector.this.producer.transformUpdate(event.getData());
 			if (event.getHeader().getEventType() == EventType.EXT_DELETE_ROWS)
 				MySQLBinlogConnector.this.producer.transformDelete(event.getData());
+			if (event.getHeader().getEventType() == EventType.ROTATE)
+				MySQLBinlogConnector.this.producer.changePosition(event.getData());
 		} catch (BusinessException ex) {
 			ex.printStackTrace();
 		}

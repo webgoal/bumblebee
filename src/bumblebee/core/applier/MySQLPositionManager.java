@@ -9,7 +9,7 @@ import bumblebee.core.exceptions.BusinessException;
 
 public class MySQLPositionManager {
 	
-	public class LogPosition {
+	public static class LogPosition {
 		private String filename;
 		private Long position;
 		public LogPosition(String filename, Long position) {

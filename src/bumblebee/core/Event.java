@@ -4,19 +4,10 @@ import java.util.Map;
 
 public class Event {
 
-	private Long position;
 	private String namespace;
 	private String collection;
 	private Map<String, Object> data;
 	private Map<String, Object> conditions;
-
-	public void setPosition(Long position) {
-		this.position = position;
-	}
-	
-	public Long getPosition() {
-		return position;
-	}
 	
 	public void setNamespace(String namespace) {
 		this.namespace = namespace;
@@ -51,7 +42,7 @@ public class Event {
 	}
 
 	@Override public String toString() {
-		return "bumblebee.core.Event [position=" + position + ", namespace=" + namespace
+		return "bumblebee.core.Event [namespace=" + namespace
 				+ ", collection=" + collection + ", data=" + data + ", conditions="  + conditions+ "]";
 	}
 }

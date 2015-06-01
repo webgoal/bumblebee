@@ -12,6 +12,7 @@ import bumblebee.core.interfaces.Producer;
 import bumblebee.core.interfaces.SchemaManager;
 
 import com.github.shyiko.mysql.binlog.event.DeleteRowsEventData;
+import com.github.shyiko.mysql.binlog.event.RotateEventData;
 import com.github.shyiko.mysql.binlog.event.TableMapEventData;
 import com.github.shyiko.mysql.binlog.event.UpdateRowsEventData;
 import com.github.shyiko.mysql.binlog.event.WriteRowsEventData;
@@ -79,6 +80,10 @@ public class MySQLBinlogAdapter implements Producer {
 		for (int i = 0; i < row.length; i++)
 			map.put(schemaManager.getColumnName(tableName, i), row[i]);
 		return map;
+	}
+
+	public void changePosition(RotateEventData data) throws BusinessException {
+		consumer.setPosition(data.getBinlogFilename(), data.getBinlogPosition());
 	}
 
 }
