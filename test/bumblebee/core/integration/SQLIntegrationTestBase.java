@@ -11,7 +11,7 @@ import bumblebee.core.exceptions.BusinessException;
 
 public class SQLIntegrationTestBase {
 
-	private Connection connection = null;
+	protected Connection connection = null;
 	
 	@After public void after() throws SQLException {
 		if (connection != null && !connection.isClosed())

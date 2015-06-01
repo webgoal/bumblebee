@@ -36,7 +36,7 @@ public class MySQLPositionManager {
 	public LogPosition getCurrentLogPosition() throws BusinessException {
 		try {
 			Statement statement = connection.createStatement();
-			ResultSet query = statement.executeQuery("SELECT binlog_filename, binlog_position FROM db.log_position");
+			ResultSet query = statement.executeQuery("SELECT binlog_filename, binlog_position FROM " + db + "." + table);
 			query.first();
 			return new LogPosition(query.getString("binlog_filename"), query.getLong("binlog_position"));
 		} catch (SQLException e) {
