@@ -2,6 +2,7 @@ package bumblebee.core.applier;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 
@@ -24,6 +25,12 @@ public class MySQLConsumer implements Consumer {
 	
 	public void setPositionManager(MySQLPositionManager positionManager) {
 		this.positionManager = positionManager;
+		try {
+			positionManager.setConnection(DriverManager.getConnection(url, user, pass));
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override public void insert(Event event) throws BusinessException {

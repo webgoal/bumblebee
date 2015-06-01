@@ -55,7 +55,6 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 	}
 	
 	@Override public void onEvent(com.github.shyiko.mysql.binlog.event.Event event) {
-//		LogPosition log = new MySQLPositionManager.LogPosition("lalala", ((EventHeaderV4) event.getHeader()).getNextPosition());
 		try {
 			System.out.println(event);
 			if (event.getHeader().getEventType() == EventType.TABLE_MAP)
