@@ -1,4 +1,4 @@
-package bumblebee.core;
+package bumblebee.core.integration;
 
 import static org.junit.Assert.*;
 
@@ -10,7 +10,6 @@ import org.junit.rules.ExpectedException;
 
 import bumblebee.core.applier.MySQLPositionManager;
 import bumblebee.core.exceptions.BusinessException;
-import bumblebee.core.integration.SQLIntegrationTestBase;
 
 
 public class MySQLPositionManagerTest extends SQLIntegrationTestBase {
