@@ -1,25 +1,59 @@
 package bumblebee.core.applier;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 public class MySQLPositionManager {
+	
+	public class LogPosition {
+		private String filename;
+		private Long position;
+		public LogPosition(String filename, Long position) {
+			this.filename = filename;
+			this.position = position;
+		}
+		public String getFilename() { return filename; }
+		public Long getPosition() { return position; }
+	}
 
 	private String db;
 	private String table;
+	private Connection connection;
 
 	public MySQLPositionManager(String db, String table) {
 		this.db = db;
 		this.table = table;
 	}
 
-	public String getCurrentLogName() {
-		return "mysql-bin.000001";
+	public void setConnection(Connection connection) {
+		this.connection = connection;
+	}
+	
+	public LogPosition getCurrentLogPosition() {
+		try {
+			Statement statement = connection.createStatement();
+			ResultSet query = statement.executeQuery("SELECT binlog_filename, binlog_position FROM db.log_position");
+			query.first();
+			return new LogPosition(query.getString("binlog_filename"), query.getLong("binlog_position"));
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
-	public Long getCurrentLogPosition() {
-		return 4L;
+	public void update(String logName, Long logPosition) {
+		try {
+			Statement statement = connection.createStatement();
+			statement.executeUpdate(prepareUpdateSQL(logName, logPosition));
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
-	public String prepareUpdateSQL(String logName, Long logPosition) {
-		return "UPDATE " + db + "." + table + " SET log_name = '" + logName + "' SET log_pos = '" + logPosition + "'";
+	private String prepareUpdateSQL(String logName, Long logPosition) {
+		return "UPDATE " + db + "." + table + " SET binlog_filename = '" + logName + "', binlog_position = '" + logPosition + "'";
 	}
 
 }

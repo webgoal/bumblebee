@@ -5,24 +5,31 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import bumblebee.core.applier.MySQLPositionManager;
+import bumblebee.core.integration.SQLIntegrationTestBase;
 
 
-public class MySQLPositionManagerTest {
+public class MySQLPositionManagerTest extends SQLIntegrationTestBase {
 	
-	@Test public void shouldReturnCurrentPosition() {
+	@Test public void shouldReturnInitialPosition() {
 		String expectedLogName = "mysql-bin.000001";
 		Long expectedLogPosition = 4L;
-		MySQLPositionManager positionManager = new MySQLPositionManager("db_name", "table_name");
-		assertEquals(expectedLogName, positionManager.getCurrentLogName());
-		assertEquals(expectedLogPosition, positionManager.getCurrentLogPosition());
+		MySQLPositionManager positionManager = new MySQLPositionManager("db", "log_position");
+		positionManager.setConnection(getFakeConnection());
+		
+		assertEquals(expectedLogName, positionManager.getCurrentLogPosition().getFilename());
+		assertEquals(expectedLogPosition, positionManager.getCurrentLogPosition().getPosition());
 	}
 	
-	@Test public void shouldTranslateCurrentPositionIntoSQL() {
-		String expectedLogName = "mysql-bin.000001";
-		Long expectedLogPosition = 4L;
-		MySQLPositionManager positionManager = new MySQLPositionManager("db_name", "table_name");
-		String expectedSQL = "UPDATE db_name.table_name SET log_name = 'mysql-bin.000001' SET log_pos = '4'";
-		assertEquals(expectedSQL, positionManager.prepareUpdateSQL(expectedLogName, expectedLogPosition));
+	@Test public void shouldUpdateCurrentPosition() {
+		String expectedLogName = "mysql-bin.000002";
+		Long expectedLogPosition = 10L;
+		MySQLPositionManager positionManager = new MySQLPositionManager("db", "log_position");
+		positionManager.setConnection(getFakeConnection());
+		
+		positionManager.update(expectedLogName, expectedLogPosition);
+		
+		assertEquals(expectedLogName, positionManager.getCurrentLogPosition().getFilename());
+		assertEquals(expectedLogPosition, positionManager.getCurrentLogPosition().getPosition());
 	}
 	
 //	Teste quando não há posição
