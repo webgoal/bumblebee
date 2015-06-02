@@ -2,6 +2,7 @@ package bumblebee.core.reader;
 
 import java.io.IOException;
 
+import util.MySQLConnectionManager;
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.exceptions.BusinessException;
 
@@ -10,16 +11,11 @@ import com.github.shyiko.mysql.binlog.event.EventHeaderV4;
 import com.github.shyiko.mysql.binlog.event.EventType;
 
 public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
-	private static final String host     = "192.168.59.103";
-	private static final String user     = "root";
-	private static final String pass     = "mypass";
-	private static final Integer port    = 3306;
-	
 	private BinaryLogClient client;
 	private MySQLBinlogAdapter producer;
 
 	public MySQLBinlogConnector(LogPosition logPosition) {
-		client = new BinaryLogClient(host, port, null, user, pass);
+		client = new BinaryLogClient(MySQLConnectionManager.getProducerHost(), MySQLConnectionManager.getProducerPort(), null, MySQLConnectionManager.getProducerUser(), MySQLConnectionManager.getProducerPass());
 		client.setBinlogFilename(logPosition.getFilename());
 		client.setBinlogPosition(logPosition.getPosition());
 		client.registerLifecycleListener(new BinaryLogClient.LifecycleListener() {

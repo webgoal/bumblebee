@@ -1,36 +1,23 @@
 package bumblebee.core.applier;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 
+import util.ConnectionManager;
 import bumblebee.core.Event;
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.Consumer;
 
 public class MySQLConsumer implements Consumer {
-	private static final String host     = "192.168.59.103";
-	private static final String user     = "root";
-	private static final String pass     = "mypass";
-	private static final Integer port    = 3307;
-	private final String url;
+	
 	private MySQLPositionManager positionManager;
+	private ConnectionManager connectionManager;
 	
-	public MySQLConsumer() {
-		this.url = "jdbc:mysql://" + host + ":" + port;
-	}
-	
-	public void setPositionManager(MySQLPositionManager positionManager) {
+	public void setPositionManager(MySQLPositionManager positionManager) throws BusinessException {
 		this.positionManager = positionManager;
-		try {
-			positionManager.setConnection(DriverManager.getConnection(url, user, pass));
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		positionManager.setConnection(connectionManager.getConsumerConnection());
 	}
 
 	@Override public void insert(Event event) throws BusinessException {
@@ -60,10 +47,9 @@ public class MySQLConsumer implements Consumer {
 	private void executeSql(String sql) throws BusinessException {
 		System.out.println("SQL: " + sql);
 		try {
-			Connection connection  = DriverManager.getConnection(url, user, pass);
-			Statement stmt = connection.createStatement();
+			Statement stmt = connectionManager.getConsumerConnection().createStatement();
 			stmt.executeUpdate(sql);
-		} catch (Exception e) {
+		} catch (SQLException e) {
 			throw new BusinessException(e);
 		}
 	}
@@ -97,5 +83,10 @@ public class MySQLConsumer implements Consumer {
 		data.forEach((k,v) -> sb.append(k + " = '" + v + "'" + glue));
 		sb.replace(sb.length() - glue.length(), sb.length(), "");
 		return sb.toString();
+	}
+
+	@Override
+	public void setConnectionManager(ConnectionManager connectionManager) {
+		this.connectionManager = connectionManager;
 	}
 }

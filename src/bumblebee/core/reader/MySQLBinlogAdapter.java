@@ -1,10 +1,12 @@
 package bumblebee.core.reader;
 
 import java.io.Serializable;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import util.ConnectionManager;
 import bumblebee.core.Event;
 import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.Consumer;
@@ -25,6 +27,8 @@ public class MySQLBinlogAdapter implements Producer {
 	private Map<Long, String> dbInfo = new HashMap<Long, String>();
 	private SchemaManager schemaManager;
 
+	private ConnectionManager connectionManager;
+
 	public String getTableById(Long tableId) {
 		return tableInfo.get(tableId);
 	}
@@ -43,40 +47,62 @@ public class MySQLBinlogAdapter implements Producer {
 	}
 
 	public void transformInsert(WriteRowsEventData data, EventHeaderV4 eventHeaderV4) throws BusinessException {
-		for (Serializable[] row : data.getRows()) {
-			Event event = new Event();
-			event.setNamespace(dbInfo.get(data.getTableId()));
-			event.setCollection(tableInfo.get(data.getTableId()));			
-			event.setData(dataToMap(tableInfo.get(data.getTableId()), row));
+		System.out.println("lalala");
+		try {
+			for (Serializable[] row : data.getRows()) {
+				Event event = new Event();
+				event.setNamespace(dbInfo.get(data.getTableId()));
+				event.setCollection(tableInfo.get(data.getTableId()));			
+				event.setData(dataToMap(tableInfo.get(data.getTableId()), row));
+	
+				consumer.insert(event);
+			}
+			consumer.setPosition(eventHeaderV4.getNextPosition());
 
-			consumer.insert(event);
+			commit();
 		}
-		consumer.setPosition(eventHeaderV4.getNextPosition());
+		catch(BusinessException e) {
+			System.out.println("deu merda");
+			rollback();
+			throw e;
+		}
 	}
 
 	public void transformUpdate(UpdateRowsEventData data, EventHeaderV4 eventHeaderV4) throws BusinessException {
-		for (Entry<Serializable[], Serializable[]> row : data.getRows()) {
-			Event event = new Event();
-			event.setNamespace(dbInfo.get(data.getTableId()));
-			event.setCollection(tableInfo.get(data.getTableId()));
-			event.setConditions(dataToMap(tableInfo.get(data.getTableId()), row.getKey()));
-			event.setData(dataToMap(tableInfo.get(data.getTableId()), row.getValue()));
-
-			consumer.update(event);
+		try {
+			for (Entry<Serializable[], Serializable[]> row : data.getRows()) {
+				Event event = new Event();
+				event.setNamespace(dbInfo.get(data.getTableId()));
+				event.setCollection(tableInfo.get(data.getTableId()));
+				event.setConditions(dataToMap(tableInfo.get(data.getTableId()), row.getKey()));
+				event.setData(dataToMap(tableInfo.get(data.getTableId()), row.getValue()));
+	
+				consumer.update(event);
+			}
+			consumer.setPosition(eventHeaderV4.getNextPosition());
+			commit();
+		} catch(BusinessException e) {
+			rollback();
+			throw e;
 		}
-		consumer.setPosition(eventHeaderV4.getNextPosition());
 	}
 	
 	public void transformDelete(DeleteRowsEventData data, EventHeaderV4 eventHeaderV4) throws BusinessException {
-		for (Serializable[] row : data.getRows()) {
-			Event event = new Event();
-			event.setNamespace(dbInfo.get(data.getTableId()));
-			event.setCollection(tableInfo.get(data.getTableId()));
-			event.setConditions(dataToMap(tableInfo.get(data.getTableId()), row));
-
-			consumer.delete(event);
+		try {
+			for (Serializable[] row : data.getRows()) {
+				Event event = new Event();
+				event.setNamespace(dbInfo.get(data.getTableId()));
+				event.setCollection(tableInfo.get(data.getTableId()));
+				event.setConditions(dataToMap(tableInfo.get(data.getTableId()), row));
+	
+				consumer.delete(event);
+			}
+			consumer.setPosition(eventHeaderV4.getNextPosition());
+			commit();
+		} catch(BusinessException e) {
+			rollback();
+			throw e;
 		}
-		consumer.setPosition(eventHeaderV4.getNextPosition());
 	}
 
 	private Map<String, Object> dataToMap(String tableName, Serializable[] row) {
@@ -88,6 +114,28 @@ public class MySQLBinlogAdapter implements Producer {
 
 	public void changePosition(RotateEventData data) throws BusinessException {
 		consumer.setPosition(data.getBinlogFilename(), data.getBinlogPosition());
+	}
+	
+	public void commit() {
+		try {
+			connectionManager.getConsumerConnection().commit();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void rollback() {
+		try {
+			connectionManager.getConsumerConnection().rollback();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+	@Override
+	public void setConnectionManager(ConnectionManager connectionManager) {
+		this.connectionManager = connectionManager;
 	}
 
 }

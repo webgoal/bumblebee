@@ -17,7 +17,7 @@ public abstract class AbstractTransformer implements Transformer {
 
 	@Override public void delete(Event event) throws BusinessException { }
 
-	@Override public void setPositionManager(MySQLPositionManager positionManager) { 
+	@Override public void setPositionManager(MySQLPositionManager positionManager) throws BusinessException { 
 		consumer.setPositionManager(positionManager);
 	}
 

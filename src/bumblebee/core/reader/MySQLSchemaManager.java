@@ -9,27 +9,25 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import util.ConnectionManager;
+import util.MySQLConnectionManager;
 import bumblebee.core.interfaces.SchemaManager;
 
 public class MySQLSchemaManager implements SchemaManager {
 	private Map<String, List<String>> tableSchemas = new HashMap<String, List<String>>();
-	private static final String host     = "192.168.59.103";
-	private static final String user     = "root";
-	private static final String pass     = "mypass";
-	private static final String database = "db";
-	private static final Integer port    = 3306;
+	private ConnectionManager connectionManager;
 
 	@Override public String getColumnName(String tableName, int index) {
-		if(!tableSchemas.containsKey(tableName))
+		if(!tableSchemas.containsKey(tableName)) {
 			loadTableSchema(tableName);
+			System.out.println("Num tem");
+		}
 		return tableSchemas.get(tableName).get(index);
 	}
 
 	private void loadTableSchema(String tableName) {
 		try {
-			Class.forName("com.mysql.jdbc.Driver");
-			String url  = "jdbc:mysql://" + host + ":" + port + "/" + database;
-			Connection connection  = DriverManager.getConnection(url, user, pass);
+			Connection connection  = connectionManager.getProducerConnection();
 			DatabaseMetaData meta = connection.getMetaData();
 			ResultSet columnsMetaData = meta.getColumns(null, null, tableName, null);
 			
@@ -43,6 +41,11 @@ public class MySQLSchemaManager implements SchemaManager {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void setConnectionManager(ConnectionManager connectionManager) {
+		this.connectionManager = connectionManager;
 	}
 
 }

@@ -26,7 +26,8 @@ public class Main {
 		tr.attach(consumer);
 
 		MySQLBinlogAdapter producer = new MySQLBinlogAdapter();
-		producer.setSchemaManager(new MySQLSchemaManager());
+		MySQLSchemaManager schemaManager = new MySQLSchemaManager();
+		producer.setSchemaManager(schemaManager);
 		producer.attach(tr);
 
 		MySQLBinlogConnector connector = new MySQLBinlogConnector(positionManager.getCurrentLogPosition());		
