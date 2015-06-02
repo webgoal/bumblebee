@@ -8,7 +8,7 @@ import java.sql.Statement;
 import bumblebee.core.exceptions.BusinessException;
 
 public class MySQLPositionManager {
-	
+
 	public static class LogPosition {
 		private String filename;
 		private Long position;
@@ -32,7 +32,7 @@ public class MySQLPositionManager {
 	public void setConnection(Connection connection) {
 		this.connection = connection;
 	}
-	
+
 	public LogPosition getCurrentLogPosition() throws BusinessException {
 		try {
 			Statement statement = connection.createStatement();

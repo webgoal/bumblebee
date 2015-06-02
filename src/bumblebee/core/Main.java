@@ -6,9 +6,11 @@ import bumblebee.core.applier.MySQLConsumer;
 import bumblebee.core.applier.MySQLPositionManager;
 import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.Consumer;
+import bumblebee.core.interfaces.Transformer;
 import bumblebee.core.reader.MySQLBinlogAdapter;
 import bumblebee.core.reader.MySQLBinlogConnector;
 import bumblebee.core.reader.MySQLSchemaManager;
+import bumblebee.transformer.DelegateTransformer;
 
 public class Main {
 	public static void main(String[] args) throws IOException, ClassNotFoundException, BusinessException {
@@ -19,13 +21,16 @@ public class Main {
 		Consumer consumer = new MySQLConsumer();
 		consumer.setPositionManager(positionManager);
 
+		Transformer tr = new DelegateTransformer();
+
+		tr.attach(consumer);
+
 		MySQLBinlogAdapter producer = new MySQLBinlogAdapter();
 		producer.setSchemaManager(new MySQLSchemaManager());
-		producer.attach(consumer);
+		producer.attach(tr);
 
 		MySQLBinlogConnector connector = new MySQLBinlogConnector(positionManager.getCurrentLogPosition());		
 		connector.setAdapter(producer);
 		connector.start();
 	}
-	
 }
