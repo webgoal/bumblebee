@@ -36,7 +36,7 @@ public class MySQLConnectionManager {
 		return producerPort;
 	}
 	
-	public Connection getConsumerConnection() throws BusinessException {
+	public static Connection getConsumerConnection() throws BusinessException {
 		try {
 			if(consumerConnection == null || consumerConnection.isClosed()) {
 				consumerConnection = DriverManager.getConnection(consumerUrl, consumerUser, consumerPass);
@@ -48,8 +48,7 @@ public class MySQLConnectionManager {
 		}
 	}
 	
-	public Connection getProducerConnection() throws BusinessException {
-		System.out.println("oi");
+	public static Connection getProducerConnection() throws BusinessException {
 		try {
 			if(producerConnection == null || producerConnection.isClosed()) {
 				producerConnection = DriverManager.getConnection(producerUrl, producerUser, producerPass);

@@ -36,4 +36,12 @@ public abstract class AbstractTransformer implements Transformer {
 	@Override public void attach(Consumer consumer) {
 		this.consumer = consumer; 
 	}
+	
+	@Override public void commit() {
+		consumer.commit();
+	}
+	
+	@Override public void rollback() {
+		consumer.rollback();
+	}
 }

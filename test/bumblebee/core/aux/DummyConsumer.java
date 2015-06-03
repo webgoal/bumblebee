@@ -1,6 +1,5 @@
 package bumblebee.core.aux;
 
-import util.ConnectionManager;
 import bumblebee.core.Event;
 import bumblebee.core.applier.MySQLPositionManager;
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
@@ -37,5 +36,8 @@ public class DummyConsumer implements Consumer {
 	}
 
 	@Override
-	public void setConnectionManager(ConnectionManager connectionManager) { }
+	public void commit() { }
+
+	@Override
+	public void rollback() { }
 }

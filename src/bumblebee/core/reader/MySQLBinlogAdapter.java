@@ -1,12 +1,10 @@
 package bumblebee.core.reader;
 
 import java.io.Serializable;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import util.ConnectionManager;
 import bumblebee.core.Event;
 import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.Consumer;
@@ -27,8 +25,6 @@ public class MySQLBinlogAdapter implements Producer {
 	private Map<Long, String> dbInfo = new HashMap<Long, String>();
 	private SchemaManager schemaManager;
 
-	private ConnectionManager connectionManager;
-
 	public String getTableById(Long tableId) {
 		return tableInfo.get(tableId);
 	}
@@ -47,7 +43,6 @@ public class MySQLBinlogAdapter implements Producer {
 	}
 
 	public void transformInsert(WriteRowsEventData data, EventHeaderV4 eventHeaderV4) throws BusinessException {
-		System.out.println("lalala");
 		try {
 			for (Serializable[] row : data.getRows()) {
 				Event event = new Event();
@@ -59,11 +54,10 @@ public class MySQLBinlogAdapter implements Producer {
 			}
 			consumer.setPosition(eventHeaderV4.getNextPosition());
 
-			commit();
+			consumer.commit();
 		}
 		catch(BusinessException e) {
-			System.out.println("deu merda");
-			rollback();
+			consumer.rollback();
 			throw e;
 		}
 	}
@@ -80,9 +74,9 @@ public class MySQLBinlogAdapter implements Producer {
 				consumer.update(event);
 			}
 			consumer.setPosition(eventHeaderV4.getNextPosition());
-			commit();
+			consumer.commit();
 		} catch(BusinessException e) {
-			rollback();
+			consumer.rollback();
 			throw e;
 		}
 	}
@@ -98,9 +92,9 @@ public class MySQLBinlogAdapter implements Producer {
 				consumer.delete(event);
 			}
 			consumer.setPosition(eventHeaderV4.getNextPosition());
-			commit();
+			consumer.commit();
 		} catch(BusinessException e) {
-			rollback();
+			consumer.rollback();
 			throw e;
 		}
 	}
@@ -115,27 +109,4 @@ public class MySQLBinlogAdapter implements Producer {
 	public void changePosition(RotateEventData data) throws BusinessException {
 		consumer.setPosition(data.getBinlogFilename(), data.getBinlogPosition());
 	}
-	
-	public void commit() {
-		try {
-			connectionManager.getConsumerConnection().commit();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void rollback() {
-		try {
-			connectionManager.getConsumerConnection().rollback();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-	}
-
-	@Override
-	public void setConnectionManager(ConnectionManager connectionManager) {
-		this.connectionManager = connectionManager;
-	}
-
 }
