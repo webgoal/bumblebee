@@ -13,7 +13,9 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import util.ConnectionManager;
 import bumblebee.core.aux.DummyConsumer;
+import bumblebee.core.aux.H2ConnectionManager;
 import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.SchemaManager;
 import bumblebee.core.reader.MySQLBinlogAdapter;
@@ -29,25 +31,33 @@ public class MySQLBinlogReaderTest {
 
 	class DummySchemaManager implements SchemaManager {
 		private Map<String, List<String>> tableSchemas = new HashMap<String, List<String>>();
-		LinkedList<String> cols = new LinkedList<String>();		
+		LinkedList<String> cols = new LinkedList<String>();
+		private ConnectionManager connectionManager;
+
 		public DummySchemaManager() {
 			cols.add("first_col_name");
 			cols.add("second_col_name");
 			tableSchemas.put("some_table", cols);
 		}
+
 		@Override public String getColumnName(String tableName, int index) {
 			return tableSchemas.get(tableName).get(index);
 		}
+
+		@Override public void setConnectionManager(ConnectionManager connectionManager) {
+			this.connectionManager = connectionManager;
+		}
 	}
-	
+
 	private DummyConsumer readerx;
 	private MySQLBinlogAdapter reader;
-	
+
 	@Before public void setup() throws BusinessException {
 		readerx = new DummyConsumer();
 		readerx.setPosition("mysqllog-name", 0L);
 		
 		reader = new MySQLBinlogAdapter();
+		reader.setConnectionManager(new H2ConnectionManager());
 		reader.attach(readerx);
 		reader.setSchemaManager(new DummySchemaManager());
 	}

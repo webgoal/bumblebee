@@ -20,7 +20,7 @@ public class MySQLSchemaManager implements SchemaManager {
 	@Override public String getColumnName(String tableName, int index) {
 		if(!tableSchemas.containsKey(tableName)) {
 			loadTableSchema(tableName);
-			System.out.println("Num tem");
+			System.out.println(tableSchemas);
 		}
 		return tableSchemas.get(tableName).get(index);
 	}
@@ -29,9 +29,10 @@ public class MySQLSchemaManager implements SchemaManager {
 		try {
 			Connection connection  = connectionManager.getProducerConnection();
 			DatabaseMetaData meta = connection.getMetaData();
-			ResultSet columnsMetaData = meta.getColumns(null, null, tableName, null);
+			ResultSet columnsMetaData = meta.getColumns(null, "some_db", tableName, null);
 			
 			List<String> columns = new LinkedList<String>();
+			System.out.println(columnsMetaData);
 			while(columnsMetaData.next()) {
 				String name = columnsMetaData.getString("COLUMN_NAME");
 //			String typeLowerCase = columnsMetaData.getString("TYPE_NAME").toLowerCase();

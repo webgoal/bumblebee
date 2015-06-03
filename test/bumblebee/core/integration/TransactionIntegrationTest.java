@@ -18,6 +18,7 @@ import bumblebee.core.applier.MySQLPositionManager;
 import bumblebee.core.aux.H2ConnectionManager;
 import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.Consumer;
+import bumblebee.core.interfaces.SchemaManager;
 import bumblebee.core.interfaces.Transformer;
 import bumblebee.core.reader.MySQLBinlogAdapter;
 import bumblebee.core.reader.MySQLSchemaManager;
@@ -55,7 +56,9 @@ public class TransactionIntegrationTest extends SQLIntegrationTestBase {
 		tr.attach(consumer);
 
 		MySQLBinlogAdapter producer = spy(MySQLBinlogAdapter.class);
-		producer.setSchemaManager(new MySQLSchemaManager());
+		SchemaManager sm = new MySQLSchemaManager();
+		sm.setConnectionManager(new H2ConnectionManager());
+		producer.setSchemaManager(sm);
 		producer.attach(tr);
 
 		WriteRowsEventData wred = new WriteRowsEventData();
@@ -71,6 +74,5 @@ public class TransactionIntegrationTest extends SQLIntegrationTestBase {
 		
 		producer.transformInsert(wred, header);
 		verify(producer).commit();
-//		verify(producer).rollback();
 	}
 }

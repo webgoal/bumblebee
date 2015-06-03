@@ -1,5 +1,6 @@
 package bumblebee.transformer;
 
+import util.ConnectionManager;
 import bumblebee.core.Event;
 import bumblebee.core.exceptions.BusinessException;
 
@@ -14,5 +15,10 @@ public class DelegateTransformer extends AbstractTransformer {
 	
 	@Override public void delete(Event event) throws BusinessException {
 		consumer.delete(event);
+	}
+
+	@Override
+	public void setConnectionManager(ConnectionManager connectionManager) {
+		consumer.setConnectionManager(connectionManager);
 	}
 }
