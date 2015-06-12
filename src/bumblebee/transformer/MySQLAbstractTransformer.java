@@ -1,16 +1,17 @@
 package bumblebee.transformer;
 
-import bumblebee.core.Event;
+import bumblebee.core.applier.MySQLConsumer;
 import bumblebee.core.applier.MySQLPositionManager;
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
+import bumblebee.core.events.Event;
 import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.Consumer;
 import bumblebee.core.interfaces.Transformer;
 
-public abstract class AbstractTransformer implements Transformer {
+public abstract class MySQLAbstractTransformer extends MySQLConsumer implements Transformer {
 
 	protected Consumer consumer;
-
+	
 	@Override public void insert(Event event) throws BusinessException { }
 
 	@Override public void update(Event event) throws BusinessException { }

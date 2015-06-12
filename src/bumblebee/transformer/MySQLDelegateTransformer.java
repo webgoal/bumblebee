@@ -1,9 +1,9 @@
 package bumblebee.transformer;
 
-import bumblebee.core.Event;
+import bumblebee.core.events.Event;
 import bumblebee.core.exceptions.BusinessException;
 
-public class DelegateTransformer extends AbstractTransformer {
+public class MySQLDelegateTransformer extends MySQLAbstractTransformer {
 	@Override public void insert(Event event) throws BusinessException {
 		consumer.insert(event);
 	}

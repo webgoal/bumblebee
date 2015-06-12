@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import bumblebee.core.applier.MySQLConsumer;
+import bumblebee.core.events.Event;
 
 public class MySQLConsumerTest {
 	

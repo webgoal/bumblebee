@@ -1,5 +1,6 @@
-package bumblebee.core;
+package bumblebee.core.events;
 
+import java.util.Collections;
 import java.util.Map;
 
 public class Event {
@@ -38,11 +39,24 @@ public class Event {
 	}
 	
 	public Map<String, Object> getConditions() {
+		if (conditions == null) return Collections.emptyMap();
 		return conditions;
 	}
 
 	@Override public String toString() {
 		return "bumblebee.core.Event [namespace=" + namespace
 				+ ", collection=" + collection + ", data=" + data + ", conditions="  + conditions+ "]";
+	}
+	
+	public boolean isInsert() {
+		return false;
+	}
+
+	public boolean isUpdate() {
+		return false;
+	}
+
+	public boolean isDelete() {
+		return false;
 	}
 }

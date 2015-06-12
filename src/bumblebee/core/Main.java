@@ -10,7 +10,7 @@ import bumblebee.core.interfaces.Transformer;
 import bumblebee.core.reader.MySQLBinlogAdapter;
 import bumblebee.core.reader.MySQLBinlogConnector;
 import bumblebee.core.reader.MySQLSchemaManager;
-import bumblebee.transformer.DelegateTransformer;
+import bumblebee.transformer.MySQLDelegateTransformer;
 
 public class Main {
 	public static void main(String[] args) throws IOException, ClassNotFoundException, BusinessException {
@@ -21,7 +21,7 @@ public class Main {
 		Consumer consumer = new MySQLConsumer();
 		consumer.setPositionManager(positionManager);
 
-		Transformer tr = new DelegateTransformer();
+		Transformer tr = new MySQLDelegateTransformer();
 
 		tr.attach(consumer);
 

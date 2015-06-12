@@ -5,8 +5,8 @@ import java.sql.Statement;
 import java.util.Map;
 
 import util.MySQLConnectionManager;
-import bumblebee.core.Event;
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
+import bumblebee.core.events.Event;
 import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.Consumer;
 
@@ -18,6 +18,12 @@ public class MySQLConsumer implements Consumer {
 		this.positionManager = positionManager;
 	}
 
+	@Override public void consume(Event event) throws BusinessException {
+		if (event.isInsert()) insert(event);
+		if (event.isUpdate()) update(event);
+		if (event.isDelete()) delete(event);
+	}
+	
 	@Override public void insert(Event event) throws BusinessException {
 		executeSql(prepareInsertSQL(event));
 	}

@@ -1,8 +1,8 @@
 package bumblebee.core.aux;
 
-import bumblebee.core.Event;
 import bumblebee.core.applier.MySQLPositionManager;
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
+import bumblebee.core.events.Event;
 import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.Consumer;
 
@@ -14,6 +14,9 @@ public class DummyConsumer implements Consumer {
 		return lastEvent;
 	}
 
+	@Override public void consume(Event event) {
+		lastEvent = event;
+	}
 	@Override public void insert(Event event) {
 		lastEvent = event;
 	}
@@ -35,9 +38,8 @@ public class DummyConsumer implements Consumer {
 		return lastPosition;
 	}
 
-	@Override
-	public void commit() { }
+	@Override public void commit() { }
 
-	@Override
-	public void rollback() { }
+	@Override public void rollback() { }
+
 }

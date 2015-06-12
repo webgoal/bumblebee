@@ -1,11 +1,12 @@
 package bumblebee.core.interfaces;
 
-import bumblebee.core.Event;
 import bumblebee.core.applier.MySQLPositionManager;
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
+import bumblebee.core.events.Event;
 import bumblebee.core.exceptions.BusinessException;
 
 public interface Consumer {
+	void consume(Event event) throws BusinessException;
 	void insert(Event event) throws BusinessException;
 	void update(Event event) throws BusinessException;
 	void delete(Event event) throws BusinessException;

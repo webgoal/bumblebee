@@ -14,14 +14,14 @@ import com.github.shyiko.mysql.binlog.event.EventHeaderV4;
 import com.github.shyiko.mysql.binlog.event.TableMapEventData;
 import com.github.shyiko.mysql.binlog.event.WriteRowsEventData;
 
-import bumblebee.core.Event;
 import bumblebee.core.applier.MySQLConsumer;
 import bumblebee.core.applier.MySQLPositionManager;
+import bumblebee.core.events.Event;
 import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.SchemaManager;
 import bumblebee.core.interfaces.Transformer;
 import bumblebee.core.reader.MySQLBinlogAdapter;
-import bumblebee.transformer.DelegateTransformer;
+import bumblebee.transformer.MySQLDelegateTransformer;
 
 public class TransactionIntegrationTest extends SQLIntegrationTestBase {
 
@@ -29,7 +29,7 @@ public class TransactionIntegrationTest extends SQLIntegrationTestBase {
 		MySQLBinlogAdapter producer = new MySQLBinlogAdapter();
 		producer.setSchemaManager(mock(SchemaManager.class));
 
-		Transformer transformer = new DelegateTransformer();
+		Transformer transformer = new MySQLDelegateTransformer();
 		producer.attach(transformer);
 
 		MySQLConsumer mySQLConsumer = spy(MySQLConsumer.class);
@@ -66,7 +66,7 @@ public class TransactionIntegrationTest extends SQLIntegrationTestBase {
 		MySQLBinlogAdapter producer = new MySQLBinlogAdapter();
 		producer.setSchemaManager(mock(SchemaManager.class));
 
-		Transformer transformer = new DelegateTransformer();
+		Transformer transformer = new MySQLDelegateTransformer();
 		producer.attach(transformer);
 
 		MySQLConsumer mySQLConsumer = spy(MySQLConsumer.class);

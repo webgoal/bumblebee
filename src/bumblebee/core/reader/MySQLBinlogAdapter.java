@@ -5,7 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import bumblebee.core.Event;
+import bumblebee.core.events.DeleteEvent;
+import bumblebee.core.events.Event;
+import bumblebee.core.events.InsertEvent;
+import bumblebee.core.events.UpdateEvent;
 import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.Consumer;
 import bumblebee.core.interfaces.Producer;
@@ -45,7 +48,7 @@ public class MySQLBinlogAdapter implements Producer {
 	public void transformInsert(WriteRowsEventData data, EventHeaderV4 eventHeaderV4) throws BusinessException {
 		try {
 			for (Serializable[] row : data.getRows()) {
-				Event event = new Event();
+				Event event = new InsertEvent();
 				event.setNamespace(dbInfo.get(data.getTableId()));
 				event.setCollection(tableInfo.get(data.getTableId()));			
 				event.setData(dataToMap(tableInfo.get(data.getTableId()), row));
@@ -65,7 +68,7 @@ public class MySQLBinlogAdapter implements Producer {
 	public void transformUpdate(UpdateRowsEventData data, EventHeaderV4 eventHeaderV4) throws BusinessException {
 		try {
 			for (Entry<Serializable[], Serializable[]> row : data.getRows()) {
-				Event event = new Event();
+				Event event = new UpdateEvent();
 				event.setNamespace(dbInfo.get(data.getTableId()));
 				event.setCollection(tableInfo.get(data.getTableId()));
 				event.setConditions(dataToMap(tableInfo.get(data.getTableId()), row.getKey()));
@@ -84,7 +87,7 @@ public class MySQLBinlogAdapter implements Producer {
 	public void transformDelete(DeleteRowsEventData data, EventHeaderV4 eventHeaderV4) throws BusinessException {
 		try {
 			for (Serializable[] row : data.getRows()) {
-				Event event = new Event();
+				Event event = new DeleteEvent();
 				event.setNamespace(dbInfo.get(data.getTableId()));
 				event.setCollection(tableInfo.get(data.getTableId()));
 				event.setConditions(dataToMap(tableInfo.get(data.getTableId()), row));
