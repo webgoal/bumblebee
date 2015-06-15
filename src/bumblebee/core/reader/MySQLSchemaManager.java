@@ -8,8 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import util.MySQLConnectionManager;
 import bumblebee.core.interfaces.SchemaManager;
+import bumblebee.core.util.MySQLConnectionManager;
 
 public class MySQLSchemaManager implements SchemaManager {
 	private Map<String, List<String>> tableSchemas = new HashMap<String, List<String>>();

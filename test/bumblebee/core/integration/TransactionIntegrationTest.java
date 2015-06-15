@@ -1,6 +1,12 @@
 package bumblebee.core.integration;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import java.io.Serializable;
 import java.sql.SQLException;
@@ -10,10 +16,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.github.shyiko.mysql.binlog.event.EventHeaderV4;
-import com.github.shyiko.mysql.binlog.event.TableMapEventData;
-import com.github.shyiko.mysql.binlog.event.WriteRowsEventData;
-
 import bumblebee.core.applier.MySQLConsumer;
 import bumblebee.core.applier.MySQLPositionManager;
 import bumblebee.core.events.Event;
@@ -21,7 +23,11 @@ import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.SchemaManager;
 import bumblebee.core.interfaces.Transformer;
 import bumblebee.core.reader.MySQLBinlogAdapter;
-import bumblebee.transformer.MySQLDelegateTransformer;
+import bumblebee.samples.transformations.MySQLDelegateTransformer;
+
+import com.github.shyiko.mysql.binlog.event.EventHeaderV4;
+import com.github.shyiko.mysql.binlog.event.TableMapEventData;
+import com.github.shyiko.mysql.binlog.event.WriteRowsEventData;
 
 public class TransactionIntegrationTest extends SQLIntegrationTestBase {
 

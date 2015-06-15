@@ -2,9 +2,9 @@ package bumblebee.core.reader;
 
 import java.io.IOException;
 
-import util.MySQLConnectionManager;
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.exceptions.BusinessException;
+import bumblebee.core.util.MySQLConnectionManager;
 
 import com.github.shyiko.mysql.binlog.BinaryLogClient;
 import com.github.shyiko.mysql.binlog.event.EventHeaderV4;

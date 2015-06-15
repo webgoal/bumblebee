@@ -1,4 +1,4 @@
-package bumblebee.core;
+package bumblebee.samples.simple_application;
 
 import java.io.IOException;
 
@@ -10,7 +10,7 @@ import bumblebee.core.interfaces.Transformer;
 import bumblebee.core.reader.MySQLBinlogAdapter;
 import bumblebee.core.reader.MySQLBinlogConnector;
 import bumblebee.core.reader.MySQLSchemaManager;
-import bumblebee.transformer.MySQLDelegateTransformer;
+import bumblebee.samples.transformations.MySQLDelegateTransformer;
 
 public class Main {
 	public static void main(String[] args) throws IOException, ClassNotFoundException, BusinessException {

@@ -4,11 +4,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 
-import util.MySQLConnectionManager;
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.events.Event;
 import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.Consumer;
+import bumblebee.core.util.MySQLConnectionManager;
 
 public class MySQLConsumer implements Consumer {
 	

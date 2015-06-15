@@ -1,4 +1,4 @@
-package bumblebee.transformer;
+package bumblebee.core.transformations;
 
 import bumblebee.core.applier.MySQLConsumer;
 import bumblebee.core.applier.MySQLPositionManager;
