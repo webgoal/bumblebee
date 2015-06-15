@@ -20,28 +20,26 @@ public class MySQLSchemaManager implements SchemaManager {
 	}
 	
 	@Override public String getColumnName(String dbName, String tableName, int index) throws BusinessException {
-		if (!tableSchemas.containsKey(tableName))
-			loadTableSchema(dbName, tableName);
+		String fullTableName = dbName + "/" + tableName;
+		if (!tableSchemas.containsKey(fullTableName))
+			tableSchemas.put(fullTableName, loadTableSchema(dbName, tableName));
 		try {
-			return tableSchemas.get(tableName).get(index);
+			return tableSchemas.get(fullTableName).get(index);
 		} catch (IndexOutOfBoundsException ex) {
 			throw new BusinessException(ex);
 		}
 	}
 
-	private void loadTableSchema(String dbName, String tableName) {
+	private List<String> loadTableSchema(String dbName, String tableName) {
+		List<String> columns = new LinkedList<String>();
 		try {
 			DatabaseMetaData meta = connection.getMetaData();
 			ResultSet columnsMetaData = meta.getColumns(dbName, null, tableName, null);
-			
-			List<String> columns = new LinkedList<String>();
-			while(columnsMetaData.next()) {
-				String name = columnsMetaData.getString("COLUMN_NAME");
-				columns.add(name);
-			}
-			this.tableSchemas.put(tableName, columns);
+			while(columnsMetaData.next())
+				columns.add(columnsMetaData.getString("COLUMN_NAME"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return columns;
 	}
 }

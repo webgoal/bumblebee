@@ -20,14 +20,10 @@ public class MySQLPositionManager {
 		public Long getPosition() { return position; }
 	}
 
-	private String db;
-	private String table;
 	private String fullTable;
 	private Connection connection;
 
 	public MySQLPositionManager(String db, String table) {
-		this.db = db;
-		this.table = table;
 		this.fullTable = db.isEmpty() ? table : db + "." + table;
 	}
 
