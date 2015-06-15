@@ -1,22 +1,14 @@
 package bumblebee.core.transformations;
 
-import bumblebee.core.applier.MySQLConsumer;
 import bumblebee.core.applier.MySQLPositionManager;
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
-import bumblebee.core.events.Event;
 import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.Consumer;
 import bumblebee.core.interfaces.Transformer;
 
-public abstract class MySQLAbstractTransformer extends MySQLConsumer implements Transformer {
+public abstract class MySQLAbstractTransformer implements Transformer {
 
 	protected Consumer consumer;
-	
-	@Override public void insert(Event event) throws BusinessException { }
-
-	@Override public void update(Event event) throws BusinessException { }
-
-	@Override public void delete(Event event) throws BusinessException { }
 
 	@Override public void setPositionManager(MySQLPositionManager positionManager) throws BusinessException { 
 		consumer.setPositionManager(positionManager);

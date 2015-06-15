@@ -77,7 +77,7 @@ public class TransactionIntegrationTest extends SQLIntegrationTestBase {
 
 		MySQLConsumer mySQLConsumer = spy(MySQLConsumer.class);
 		doReturn(mock(Statement.class)).when(mySQLConsumer).createStatement();
-		doThrow(BusinessException.class).when(mySQLConsumer).insert(any(Event.class));
+		doThrow(BusinessException.class).when(mySQLConsumer).consume(any(Event.class));
 		doNothing().when(mySQLConsumer).rollback();
 		MySQLPositionManager myPos = mock(MySQLPositionManager.class);
 		doReturn(new MySQLPositionManager.LogPosition("binlog", 10L)).when(myPos).getCurrentLogPosition();

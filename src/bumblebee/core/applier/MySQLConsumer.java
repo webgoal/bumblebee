@@ -24,15 +24,15 @@ public class MySQLConsumer implements Consumer {
 		if (event.isDelete()) delete(event);
 	}
 	
-	@Override public void insert(Event event) throws BusinessException {
+	private void insert(Event event) throws BusinessException {
 		executeSql(prepareInsertSQL(event));
 	}
 	
-	@Override public void update(Event event) throws BusinessException {
+	private void update(Event event) throws BusinessException {
 		executeSql(transformEventIntoUpdate(event));
 	}
 
-	@Override public void delete(Event event) throws BusinessException {
+	private void delete(Event event) throws BusinessException {
 		executeSql(transformEventIntoDelete(event));
 	}
 	

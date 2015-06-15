@@ -25,10 +25,9 @@ public class MySQLSchemaManager implements SchemaManager {
 		try {
 			Connection connection  = MySQLConnectionManager.getProducerConnection();
 			DatabaseMetaData meta = connection.getMetaData();
-			ResultSet columnsMetaData = meta.getColumns(null, "some_db", tableName, null);
+			ResultSet columnsMetaData = meta.getColumns(null, null, tableName, null);
 			
 			List<String> columns = new LinkedList<String>();
-			System.out.println(columnsMetaData);
 			while(columnsMetaData.next()) {
 				String name = columnsMetaData.getString("COLUMN_NAME");
 				columns.add(name);

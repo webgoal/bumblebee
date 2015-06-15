@@ -53,7 +53,7 @@ public class MySQLBinlogAdapter implements Producer {
 				event.setCollection(tableInfo.get(data.getTableId()));			
 				event.setData(dataToMap(tableInfo.get(data.getTableId()), row));
 	
-				consumer.insert(event);
+				consumer.consume(event);
 			}
 			consumer.setPosition(eventHeaderV4.getNextPosition());
 
@@ -74,7 +74,7 @@ public class MySQLBinlogAdapter implements Producer {
 				event.setConditions(dataToMap(tableInfo.get(data.getTableId()), row.getKey()));
 				event.setData(dataToMap(tableInfo.get(data.getTableId()), row.getValue()));
 	
-				consumer.update(event);
+				consumer.consume(event);
 			}
 			consumer.setPosition(eventHeaderV4.getNextPosition());
 			consumer.commit();
@@ -92,7 +92,7 @@ public class MySQLBinlogAdapter implements Producer {
 				event.setCollection(tableInfo.get(data.getTableId()));
 				event.setConditions(dataToMap(tableInfo.get(data.getTableId()), row));
 	
-				consumer.delete(event);
+				consumer.consume(event);
 			}
 			consumer.setPosition(eventHeaderV4.getNextPosition());
 			consumer.commit();

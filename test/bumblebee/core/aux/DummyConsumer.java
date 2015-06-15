@@ -17,15 +17,7 @@ public class DummyConsumer implements Consumer {
 	@Override public void consume(Event event) {
 		lastEvent = event;
 	}
-	@Override public void insert(Event event) {
-		lastEvent = event;
-	}
-	@Override public void update(Event event) {
-		lastEvent = event;
-	}
-	@Override public void delete(Event event) {
-		lastEvent = event;
-	}
+
 	@Override public void setPositionManager(MySQLPositionManager positionManager) {
 	}
 	@Override public void setPosition(String logName, long logPosition) throws BusinessException {
