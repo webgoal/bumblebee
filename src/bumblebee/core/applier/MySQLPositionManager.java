@@ -22,11 +22,13 @@ public class MySQLPositionManager {
 
 	private String db;
 	private String table;
+	private String fullTable;
 	private Connection connection;
 
 	public MySQLPositionManager(String db, String table) {
 		this.db = db;
 		this.table = table;
+		this.fullTable = db.isEmpty() ? table : db + "." + table;
 	}
 
 	public void setConnection(Connection connection) {
@@ -36,7 +38,7 @@ public class MySQLPositionManager {
 	public LogPosition getCurrentLogPosition() throws BusinessException {
 		try {
 			Statement statement = connection.createStatement();
-			ResultSet query = statement.executeQuery("SELECT binlog_filename, binlog_position FROM " + db + "." + table);
+			ResultSet query = statement.executeQuery("SELECT binlog_filename, binlog_position FROM " + fullTable);
 			query.first();
 			return new LogPosition(query.getString("binlog_filename"), query.getLong("binlog_position"));
 		} catch (SQLException e) {
@@ -56,7 +58,7 @@ public class MySQLPositionManager {
 	}
 
 	private String prepareUpdateSQL(String logName, Long logPosition) {
-		return "UPDATE " + db + "." + table + " SET binlog_filename = '" + logName + "', binlog_position = '" + logPosition + "'";
+		return "UPDATE " + fullTable + " SET binlog_filename = '" + logName + "', binlog_position = '" + logPosition + "'";
 	}
 
 }

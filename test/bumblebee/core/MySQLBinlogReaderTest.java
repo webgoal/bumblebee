@@ -37,7 +37,7 @@ public class MySQLBinlogReaderTest {
 			tableSchemas.put("some_table", cols);
 		}
 
-		@Override public String getColumnName(String tableName, int index) {
+		@Override public String getColumnName(String dbName, String tableName, int index) {
 			return tableSchemas.get(tableName).get(index);
 		}
 	}

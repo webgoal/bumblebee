@@ -8,24 +8,31 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.SchemaManager;
-import bumblebee.core.util.MySQLConnectionManager;
 
 public class MySQLSchemaManager implements SchemaManager {
 	private Map<String, List<String>> tableSchemas = new HashMap<String, List<String>>();
+	private Connection connection;
 
-	@Override public String getColumnName(String tableName, int index) {
-		if(!tableSchemas.containsKey(tableName)) {
-			loadTableSchema(tableName);
+	public MySQLSchemaManager(Connection connection) {
+		this.connection = connection;
+	}
+	
+	@Override public String getColumnName(String dbName, String tableName, int index) throws BusinessException {
+		if (!tableSchemas.containsKey(tableName))
+			loadTableSchema(dbName, tableName);
+		try {
+			return tableSchemas.get(tableName).get(index);
+		} catch (IndexOutOfBoundsException ex) {
+			throw new BusinessException(ex);
 		}
-		return tableSchemas.get(tableName).get(index);
 	}
 
-	private void loadTableSchema(String tableName) {
+	private void loadTableSchema(String dbName, String tableName) {
 		try {
-			Connection connection  = MySQLConnectionManager.getProducerConnection();
 			DatabaseMetaData meta = connection.getMetaData();
-			ResultSet columnsMetaData = meta.getColumns(null, null, tableName, null);
+			ResultSet columnsMetaData = meta.getColumns(dbName, null, tableName, null);
 			
 			List<String> columns = new LinkedList<String>();
 			while(columnsMetaData.next()) {

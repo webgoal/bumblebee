@@ -51,7 +51,7 @@ public class MySQLBinlogAdapter implements Producer {
 				Event event = new InsertEvent();
 				event.setNamespace(dbInfo.get(data.getTableId()));
 				event.setCollection(tableInfo.get(data.getTableId()));			
-				event.setData(dataToMap(tableInfo.get(data.getTableId()), row));
+				event.setData(dataToMap(dbInfo.get(data.getTableId()), tableInfo.get(data.getTableId()), row));
 	
 				consumer.consume(event);
 			}
@@ -71,8 +71,8 @@ public class MySQLBinlogAdapter implements Producer {
 				Event event = new UpdateEvent();
 				event.setNamespace(dbInfo.get(data.getTableId()));
 				event.setCollection(tableInfo.get(data.getTableId()));
-				event.setConditions(dataToMap(tableInfo.get(data.getTableId()), row.getKey()));
-				event.setData(dataToMap(tableInfo.get(data.getTableId()), row.getValue()));
+				event.setConditions(dataToMap(dbInfo.get(data.getTableId()), tableInfo.get(data.getTableId()), row.getKey()));
+				event.setData(dataToMap(dbInfo.get(data.getTableId()), tableInfo.get(data.getTableId()), row.getValue()));
 	
 				consumer.consume(event);
 			}
@@ -90,7 +90,7 @@ public class MySQLBinlogAdapter implements Producer {
 				Event event = new DeleteEvent();
 				event.setNamespace(dbInfo.get(data.getTableId()));
 				event.setCollection(tableInfo.get(data.getTableId()));
-				event.setConditions(dataToMap(tableInfo.get(data.getTableId()), row));
+				event.setConditions(dataToMap(dbInfo.get(data.getTableId()), tableInfo.get(data.getTableId()), row));
 	
 				consumer.consume(event);
 			}
@@ -102,10 +102,10 @@ public class MySQLBinlogAdapter implements Producer {
 		}
 	}
 
-	private Map<String, Object> dataToMap(String tableName, Serializable[] row) {
+	private Map<String, Object> dataToMap(String dbName, String tableName, Serializable[] row) throws BusinessException {
 		Map<String, Object> map = new HashMap<String, Object>();
 		for (int i = 0; i < row.length; i++)
-			map.put(schemaManager.getColumnName(tableName, i), row[i]);
+			map.put(schemaManager.getColumnName(dbName, tableName, i), row[i]);
 		return map;
 	}
 

@@ -29,7 +29,7 @@ import com.github.shyiko.mysql.binlog.event.EventHeaderV4;
 import com.github.shyiko.mysql.binlog.event.TableMapEventData;
 import com.github.shyiko.mysql.binlog.event.WriteRowsEventData;
 
-public class TransactionIntegrationTest extends SQLIntegrationTestBase {
+public class TransactionIntegrationTest {
 
 	@Test public void shouldCommitAfterConsumeEvent() throws BusinessException, SQLException {
 		MySQLBinlogAdapter producer = new MySQLBinlogAdapter();

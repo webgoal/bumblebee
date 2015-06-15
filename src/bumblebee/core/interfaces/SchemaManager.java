@@ -1,6 +1,7 @@
 package bumblebee.core.interfaces;
 
-public interface SchemaManager {
+import bumblebee.core.exceptions.BusinessException;
 
-	String getColumnName(String tableName, int index);
+public interface SchemaManager {
+	String getColumnName(String dbName, String tableName, int index) throws BusinessException;
 }
