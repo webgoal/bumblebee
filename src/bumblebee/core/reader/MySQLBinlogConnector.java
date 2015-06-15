@@ -52,15 +52,15 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 		try {
 			System.out.println(event);
 			if (event.getHeader().getEventType() == EventType.TABLE_MAP)
-				MySQLBinlogConnector.this.producer.mapTable(event.getData());
+				producer.mapTable(event.getData());
 			if (event.getHeader().getEventType() == EventType.EXT_WRITE_ROWS)
-				MySQLBinlogConnector.this.producer.transformInsert(event.getData(), (EventHeaderV4) event.getHeader());
+				producer.transformInsert(event.getData(), (EventHeaderV4) event.getHeader());
 			if (event.getHeader().getEventType() == EventType.EXT_UPDATE_ROWS)
-				MySQLBinlogConnector.this.producer.transformUpdate(event.getData(), (EventHeaderV4) event.getHeader());
+				producer.transformUpdate(event.getData(), (EventHeaderV4) event.getHeader());
 			if (event.getHeader().getEventType() == EventType.EXT_DELETE_ROWS)
-				MySQLBinlogConnector.this.producer.transformDelete(event.getData(), (EventHeaderV4) event.getHeader());
+				producer.transformDelete(event.getData(), (EventHeaderV4) event.getHeader());
 			if (event.getHeader().getEventType() == EventType.ROTATE)
-				MySQLBinlogConnector.this.producer.changePosition(event.getData());
+				producer.changePosition(event.getData());
 		} catch (BusinessException ex) {
 			ex.printStackTrace();
 		}
