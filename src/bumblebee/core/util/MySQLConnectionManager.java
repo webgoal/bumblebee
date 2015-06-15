@@ -6,6 +6,7 @@ import java.sql.DriverManager;
 import bumblebee.core.exceptions.BusinessException;
 
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 public class MySQLConnectionManager {
 	private static final int LOGIN_TIMEOUT = 5;
@@ -14,6 +15,10 @@ public class MySQLConnectionManager {
 	
 	private static Config producerConf;
 	private static Config consumerConf;
+	
+	public static void loadConfig() {
+		loadConfig(ConfigFactory.defaultApplication());
+	}
 	
 	public static void loadConfig(Config config) {
 		producerConf = config.getConfig("source");
