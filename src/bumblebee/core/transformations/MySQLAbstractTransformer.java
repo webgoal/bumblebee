@@ -10,7 +10,7 @@ public abstract class MySQLAbstractTransformer implements Transformer {
 
 	protected Consumer consumer;
 
-	@Override public void setPositionManager(MySQLPositionManager positionManager) throws BusinessException { 
+	@Override public void setPositionManager(MySQLPositionManager positionManager) { 
 		consumer.setPositionManager(positionManager);
 	}
 
@@ -30,11 +30,11 @@ public abstract class MySQLAbstractTransformer implements Transformer {
 		this.consumer = consumer; 
 	}
 	
-	@Override public void commit() {
+	@Override public void commit() throws BusinessException {
 		consumer.commit();
 	}
 	
-	@Override public void rollback() {
+	@Override public void rollback() throws BusinessException {
 		consumer.rollback();
 	}
 }

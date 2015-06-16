@@ -56,10 +56,8 @@ public class MySQLBinlogAdapter implements Producer {
 				consumer.consume(event);
 			}
 			consumer.setPosition(eventHeaderV4.getNextPosition());
-
 			consumer.commit();
-		}
-		catch(BusinessException e) {
+		} catch(BusinessException e) {
 			consumer.rollback();
 			throw e;
 		}

@@ -39,15 +39,6 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 		this.producer = producer;
 	}
 	
-	public void start() {
-		try {
-			client.connect();
-		} catch (IOException e) {
-			// should try reconnect
-			e.printStackTrace();
-		}
-	}
-	
 	@Override public void onEvent(com.github.shyiko.mysql.binlog.event.Event event) {
 		try {
 			System.out.println(event);
@@ -62,6 +53,23 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 			if (event.getHeader().getEventType() == EventType.ROTATE)
 				producer.changePosition(event.getData());
 		} catch (BusinessException ex) {
+			ex.printStackTrace();
+			disconnect();
+		}
+	}
+
+	public void connect() throws BusinessException {
+		try {
+			client.connect();
+		} catch (IOException ex) {
+			throw new BusinessException(ex);
+		}
+	}
+	
+	private void disconnect() {
+		try {
+			client.disconnect();
+		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
 	}

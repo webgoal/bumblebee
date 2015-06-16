@@ -14,7 +14,7 @@ public class MySQLConsumer implements Consumer {
 	
 	private MySQLPositionManager positionManager;
 	
-	public void setPositionManager(MySQLPositionManager positionManager) throws BusinessException {
+	public void setPositionManager(MySQLPositionManager positionManager) {
 		this.positionManager = positionManager;
 	}
 
@@ -48,19 +48,19 @@ public class MySQLConsumer implements Consumer {
 		return positionManager.getCurrentLogPosition();
 	}
 	
-	@Override public void commit() {
+	@Override public void commit() throws BusinessException {
 		try {
 			MySQLConnectionManager.getConsumerConnection().commit();
-		} catch (SQLException | BusinessException e) {
-			e.printStackTrace();
+		} catch (SQLException ex) {
+			throw new BusinessException(ex);
 		}
 	}
 	
-	@Override public void rollback() {
+	@Override public void rollback() throws BusinessException {
 		try {
 			MySQLConnectionManager.getConsumerConnection().rollback();
-		} catch (SQLException | BusinessException e) {
-			e.printStackTrace();
+		} catch (SQLException ex) {
+			throw new BusinessException(ex);
 		}
 	}
 
