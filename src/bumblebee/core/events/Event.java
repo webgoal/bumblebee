@@ -3,6 +3,8 @@ package bumblebee.core.events;
 import java.util.Collections;
 import java.util.Map;
 
+import bumblebee.core.exceptions.BusinessException;
+
 public class Event {
 
 	private String namespace;
@@ -48,15 +50,15 @@ public class Event {
 				+ ", collection=" + collection + ", data=" + data + ", conditions="  + conditions+ "]";
 	}
 	
-	public boolean isInsert() {
+	public boolean isInsert() throws BusinessException {
 		return false;
 	}
 
-	public boolean isUpdate() {
+	public boolean isUpdate() throws BusinessException {
 		return false;
 	}
 
-	public boolean isDelete() {
+	public boolean isDelete() throws BusinessException {
 		return false;
 	}
 }
