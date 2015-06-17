@@ -32,7 +32,7 @@ public class Event {
 		this.data = data;
 	}
 
-	public Map<String, Object> getData() {
+	public Map<String, Object> getData() throws BusinessException {
 		if (data == null) return Collections.emptyMap();
 		return data;
 	}

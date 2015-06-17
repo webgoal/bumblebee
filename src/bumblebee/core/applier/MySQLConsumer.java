@@ -87,11 +87,11 @@ public class MySQLConsumer implements Consumer {
 		return object;
 	}
 
-	private String prepareInsertSQL(Event event) {
+	private String prepareInsertSQL(Event event) throws BusinessException {
 		return "INSERT INTO " + databaseAndTable(event) + " SET " + fields(event);
 	}
 
-	private String prepareUpdateSQL(Event event) {
+	private String prepareUpdateSQL(Event event) throws BusinessException {
 		return "UPDATE " + databaseAndTable(event) + " SET " + fields(event) + " WHERE " + conditions(event);
 	}
 
@@ -103,7 +103,7 @@ public class MySQLConsumer implements Consumer {
 		return event.getNamespace() + "." + event.getCollection();
 	}
 
-	private String fields(Event event) {
+	private String fields(Event event) throws BusinessException {
 		return serializeMap(event.getData(), ", ");
 	}
 
