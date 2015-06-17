@@ -1,11 +1,11 @@
 package bumblebee.core.applier;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
-
-import com.github.shyiko.mysql.binlog.event.ByteArrayEventData;
 
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.events.Event;
@@ -15,9 +15,11 @@ import bumblebee.core.util.MySQLConnectionManager;
 
 public class MySQLConsumer implements Consumer {
 	
+	private Connection connection;
 	private MySQLPositionManager positionManager;
 	
-	public MySQLConsumer(MySQLPositionManager positionManager) {
+	public MySQLConsumer(Connection connection, MySQLPositionManager positionManager) {
+		this.connection = connection;
 		this.positionManager = positionManager;
 	}
 	
@@ -28,15 +30,15 @@ public class MySQLConsumer implements Consumer {
 	}
 	
 	private void insert(Event event) throws BusinessException {
-		executeSql(prepareInsertSQL(event), event);
+		executeSql(prepareInsertSQL(event), event.getData().values(), Collections.emptyList());
 	}
 	
 	private void update(Event event) throws BusinessException {
-		executeSql(transformEventIntoUpdate(event), null);
+		executeSql(prepareUpdateSQL(event), event.getData().values(), event.getConditions().values());
 	}
 
 	private void delete(Event event) throws BusinessException {
-		executeSql(transformEventIntoDelete(event), null);
+		executeSql(prepareDeleteSQL(event), Collections.emptyList(), event.getConditions().values());
 	}
 	
 	@Override public void setPosition(String logName, long logPosition) throws BusinessException {
@@ -67,38 +69,33 @@ public class MySQLConsumer implements Consumer {
 		}
 	}
 
-	private void executeSql(String sql, Event event) throws BusinessException {
+	private void executeSql(String sql, Collection<Object> data, Collection<Object> conditions) throws BusinessException {
 		try {
 			System.out.println("SQL: " + sql);
-			PreparedStatement stmt = MySQLConnectionManager.getConsumerConnection().prepareStatement(sql);
+			PreparedStatement stmt = connection.prepareStatement(sql);
 			int counter = 1;
-			for (Object v : event.getData().values()) {
-				try {
-					if (v instanceof byte[]) v = new String((byte[]) v);
-					stmt.setObject(counter++, v);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
+			for (Object v : data)       stmt.setObject(counter++, fixType(v));
+			for (Object v : conditions) stmt.setObject(counter++, fixType(v));
 			stmt.executeUpdate();
 		} catch (SQLException e) {
 			throw new BusinessException(e);
 		}
 	}
 
-	public Statement createStatement() throws SQLException, BusinessException {
-		return MySQLConnectionManager.getConsumerConnection().createStatement();
+	private Object fixType(Object object) {
+		if (object instanceof byte[]) return new String((byte[]) object);
+		return object;
 	}
 
-	public String prepareInsertSQL(Event event) {
-		return "INSERT INTO " + databaseAndTable(event) + " SET " + fieldsAndValuesPrepared(event);
+	private String prepareInsertSQL(Event event) {
+		return "INSERT INTO " + databaseAndTable(event) + " SET " + fields(event);
 	}
 
-	public String transformEventIntoUpdate(Event event) {
-		return "UPDATE " + databaseAndTable(event) + " SET " + fieldsAndValues(event) + " WHERE " + conditions(event);
+	private String prepareUpdateSQL(Event event) {
+		return "UPDATE " + databaseAndTable(event) + " SET " + fields(event) + " WHERE " + conditions(event);
 	}
 
-	public String transformEventIntoDelete(Event event) {
+	private String prepareDeleteSQL(Event event) {
 		return "DELETE FROM " + databaseAndTable(event) + " WHERE " + conditions(event);
 	}
 
@@ -106,7 +103,7 @@ public class MySQLConsumer implements Consumer {
 		return event.getNamespace() + "." + event.getCollection();
 	}
 
-	private String fieldsAndValues(Event event) {
+	private String fields(Event event) {
 		return serializeMap(event.getData(), ", ");
 	}
 
@@ -116,30 +113,7 @@ public class MySQLConsumer implements Consumer {
 	
 	private String serializeMap(Map<String, Object> data, String glue) {
 		StringBuffer sb = new StringBuffer();
-		data.forEach((k, v) -> {
-			if (v instanceof byte[]) v = new String((byte[]) v);
-//			System.out.println("------");
-//			System.out.println(k);
-//			System.out.println(v);
-//			if (v != null) System.out.println(v.getClass());
-			if (v != null) {
-				if (v instanceof String || v instanceof java.util.Date)
-					sb.append(k + " = '" + v + "'" + glue);
-				else
-					sb.append(k + " = " + v + glue);
-			}
-		});
-		sb.replace(sb.length() - glue.length(), sb.length(), "");
-		return sb.toString();
-	}
-	
-	private String fieldsAndValuesPrepared(Event event) {
-		String glue = ", ";
-		StringBuffer sb = new StringBuffer();
-		event.getData().forEach((k, v) -> {
-			System.out.println(k);
-			sb.append(k + " = ?" + glue);
-		});
+		data.forEach((k, v) -> sb.append(k + " = ?" + glue));
 		sb.replace(sb.length() - glue.length(), sb.length(), "");
 		return sb.toString();
 	}

@@ -33,6 +33,7 @@ public class Event {
 	}
 
 	public Map<String, Object> getData() {
+		if (data == null) return Collections.emptyMap();
 		return data;
 	}
 	
