@@ -8,6 +8,10 @@ import bumblebee.core.interfaces.Transformer;
 public abstract class MySQLAbstractTransformer implements Transformer {
 
 	protected Consumer consumer;
+	
+	public MySQLAbstractTransformer(Consumer consumer) {
+		this.consumer = consumer;
+	}
 
 	@Override public void setPosition(String logName, long logPosition) throws BusinessException {
 		consumer.setPosition(logName, logPosition);
@@ -21,10 +25,6 @@ public abstract class MySQLAbstractTransformer implements Transformer {
 		return consumer.getCurrentLogPosition();
 	}
 
-	@Override public void attach(Consumer consumer) {
-		this.consumer = consumer; 
-	}
-	
 	@Override public void commit() throws BusinessException {
 		consumer.commit();
 	}

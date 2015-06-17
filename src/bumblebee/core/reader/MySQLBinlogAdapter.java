@@ -27,17 +27,14 @@ public class MySQLBinlogAdapter implements Producer {
 	private Map<Long, String> tableInfo = new HashMap<Long, String>();
 	private Map<Long, String> dbInfo = new HashMap<Long, String>();
 	private SchemaManager schemaManager;
-
-	public String getTableById(Long tableId) {
-		return tableInfo.get(tableId);
-	}
-
-	public void setSchemaManager(SchemaManager schemaManager) {
+	
+	public MySQLBinlogAdapter(Consumer consumer, SchemaManager schemaManager) {
+		this.consumer = consumer;
 		this.schemaManager = schemaManager;
 	}
 
-	@Override public void attach(Consumer consumer) {
-		this.consumer = consumer;
+	public String getTableById(Long tableId) {
+		return tableInfo.get(tableId);
 	}
 
 	public void mapTable(TableMapEventData data) {

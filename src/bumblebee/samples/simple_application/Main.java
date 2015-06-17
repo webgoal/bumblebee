@@ -25,17 +25,12 @@ public class Main {
 			
 			Consumer consumer = new MySQLConsumer(positionManager);
 			
-			Transformer tr = new MySQLDelegateTransformer();
+			Transformer tr = new MySQLDelegateTransformer(consumer);
 			
-			tr.attach(consumer);
-			
-			MySQLBinlogAdapter producer = new MySQLBinlogAdapter();
 			MySQLSchemaManager schemaManager = new MySQLSchemaManager(MySQLConnectionManager.getProducerConnection());
-			producer.setSchemaManager(schemaManager);
-			producer.attach(tr);
+			MySQLBinlogAdapter producer = new MySQLBinlogAdapter(tr, schemaManager);
 			
-			MySQLBinlogConnector connector = new MySQLBinlogConnector(positionManager.getCurrentLogPosition());
-			connector.setAdapter(producer);
+			MySQLBinlogConnector connector = new MySQLBinlogConnector(producer, positionManager.getCurrentLogPosition());
 			connector.connect();
 		} catch (BusinessException ex) {
 			ex.printStackTrace();

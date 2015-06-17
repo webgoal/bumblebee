@@ -49,9 +49,7 @@ public class MySQLBinlogReaderTest {
 		readerx = new DummyConsumer();
 		readerx.setPosition("mysqllog-name", 0L);
 		
-		reader = new MySQLBinlogAdapter();
-		reader.attach(readerx);
-		reader.setSchemaManager(new DummySchemaManager());
+		reader = new MySQLBinlogAdapter(readerx, new DummySchemaManager());
 	}
 	
 	private EventHeaderV4 eventHeader() {

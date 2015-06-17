@@ -27,9 +27,7 @@ public class TransactionIntegrationTest {
 	@Test public void shouldCommitAfterConsumeEvent() throws BusinessException, SQLException {
 		Consumer consumer = mock(Consumer.class);
 		
-		MySQLBinlogAdapter producer = new MySQLBinlogAdapter();
-		producer.setSchemaManager(mock(SchemaManager.class));
-		producer.attach(consumer);
+		MySQLBinlogAdapter producer = new MySQLBinlogAdapter(consumer, mock(SchemaManager.class));
 
 		WriteRowsEventData wred = new WriteRowsEventData();
 		List<Serializable[]> rows = new LinkedList<Serializable[]>();
@@ -48,9 +46,7 @@ public class TransactionIntegrationTest {
 		Consumer consumer = mock(Consumer.class);
 		doThrow(BusinessException.class).when(consumer).consume(any());
 		
-		MySQLBinlogAdapter producer = new MySQLBinlogAdapter();
-		producer.setSchemaManager(mock(SchemaManager.class));
-		producer.attach(consumer);
+		MySQLBinlogAdapter producer = new MySQLBinlogAdapter(consumer, mock(SchemaManager.class));
 
 		WriteRowsEventData wred = new WriteRowsEventData();
 		List<Serializable[]> rows = new LinkedList<Serializable[]>();

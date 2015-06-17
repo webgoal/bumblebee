@@ -14,7 +14,8 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 	private BinaryLogClient client;
 	private MySQLBinlogAdapter producer;
 
-	public MySQLBinlogConnector(LogPosition logPosition) {
+	public MySQLBinlogConnector(MySQLBinlogAdapter producer, LogPosition logPosition) {
+		this.producer = producer;
 		client = new BinaryLogClient(MySQLConnectionManager.getProducerHost(), MySQLConnectionManager.getProducerPort(), null, MySQLConnectionManager.getProducerUser(), MySQLConnectionManager.getProducerPass());
 		client.setBinlogFilename(logPosition.getFilename());
 		client.setBinlogPosition(logPosition.getPosition());
@@ -33,10 +34,6 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 			}
 		});
 		client.registerEventListener(this);
-	}
-	
-	public void setAdapter(MySQLBinlogAdapter producer) {
-		this.producer = producer;
 	}
 	
 	@Override public void onEvent(com.github.shyiko.mysql.binlog.event.Event event) {

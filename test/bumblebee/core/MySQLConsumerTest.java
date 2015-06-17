@@ -16,19 +16,12 @@ import bumblebee.core.exceptions.BusinessException;
 public class MySQLConsumerTest {
 	
 	private MySQLConsumer consumer = new MySQLConsumer(null);
-	private Event event = new Event();
 	private Map<String, Object> data = new HashMap<String, Object>();
 	private Map<String, Object> conditions = new HashMap<String, Object>();
 	
 	@Before public void setup() {
-		event.setNamespace("database");
-		event.setCollection("table");
-		
 		data.put("id", 1);
-		event.setData(data);
-		
 		conditions.put("id", 2);
-		event.setConditions(conditions);
 	}
 
 	@Test public void eventToSQLInsertTransformationTest() throws BusinessException {
