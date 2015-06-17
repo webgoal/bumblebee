@@ -23,8 +23,7 @@ public class Main {
 			MySQLPositionManager positionManager = new MySQLPositionManager("db", "log_position");
 			positionManager.setConnection(MySQLConnectionManager.getConsumerConnection());
 			
-			Consumer consumer = new MySQLConsumer();
-			consumer.setPositionManager(positionManager);
+			Consumer consumer = new MySQLConsumer(positionManager);
 			
 			Transformer tr = new MySQLDelegateTransformer();
 			
