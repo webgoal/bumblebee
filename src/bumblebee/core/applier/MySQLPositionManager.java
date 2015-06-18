@@ -47,7 +47,7 @@ public class MySQLPositionManager {
 			String sql = prepareUpdateSQL(logName, logPosition);
 			System.out.println("SQL: " + sql);
 			Statement statement = connection.createStatement();
-//			statement.executeUpdate(sql);
+			statement.executeUpdate(sql);
 		} catch (SQLException e) {
 			throw new BusinessException(e);
 		}
