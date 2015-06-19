@@ -41,7 +41,7 @@ public class Event {
 		this.conditions = conditions;		
 	}
 	
-	public Map<String, Object> getConditions() {
+	public Map<String, Object> getConditions() throws BusinessException {
 		if (conditions == null) return Collections.emptyMap();
 		return conditions;
 	}

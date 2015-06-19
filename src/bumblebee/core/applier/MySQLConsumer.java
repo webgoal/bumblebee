@@ -76,6 +76,7 @@ public class MySQLConsumer implements Consumer {
 			int counter = 1;
 			for (Object v : data)       stmt.setObject(counter++, fixType(v));
 			for (Object v : conditions) stmt.setObject(counter++, fixType(v));
+			System.err.println(stmt.toString());
 			stmt.executeUpdate();
 		} catch (SQLException e) {
 			throw new BusinessException(e);
@@ -95,7 +96,7 @@ public class MySQLConsumer implements Consumer {
 		return "UPDATE " + databaseAndTable(event) + " SET " + fields(event) + " WHERE " + conditions(event);
 	}
 
-	private String prepareDeleteSQL(Event event) {
+	private String prepareDeleteSQL(Event event) throws BusinessException {
 		return "DELETE FROM " + databaseAndTable(event) + " WHERE " + conditions(event);
 	}
 
@@ -107,7 +108,7 @@ public class MySQLConsumer implements Consumer {
 		return serializeMap(event.getData(), ", ");
 	}
 
-	private String conditions(Event event) {
+	private String conditions(Event event) throws BusinessException {
 		return serializeMap(event.getConditions(), " AND ");
 	}
 	
