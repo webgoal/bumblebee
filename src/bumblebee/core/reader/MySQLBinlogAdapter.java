@@ -42,7 +42,7 @@ public class MySQLBinlogAdapter implements Producer {
 		dbInfo.put(data.getTableId(), data.getDatabase());
 	}
 
-	public void transformInsert(WriteRowsEventData data, EventHeaderV4 eventHeaderV4) throws BusinessException {
+	public void transformInsert(WriteRowsEventData data, EventHeaderV4 eventHeaderV4) {
 		try {
 			for (Serializable[] row : data.getRows()) {
 				Event event = new InsertEvent();
@@ -60,7 +60,7 @@ public class MySQLBinlogAdapter implements Producer {
 		}
 	}
 
-	public void transformUpdate(UpdateRowsEventData data, EventHeaderV4 eventHeaderV4) throws BusinessException {
+	public void transformUpdate(UpdateRowsEventData data, EventHeaderV4 eventHeaderV4) {
 		try {
 			for (Entry<Serializable[], Serializable[]> row : data.getRows()) {
 				Event event = new UpdateEvent();
@@ -79,7 +79,7 @@ public class MySQLBinlogAdapter implements Producer {
 		}
 	}
 	
-	public void transformDelete(DeleteRowsEventData data, EventHeaderV4 eventHeaderV4) throws BusinessException {
+	public void transformDelete(DeleteRowsEventData data, EventHeaderV4 eventHeaderV4) {
 		try {
 			for (Serializable[] row : data.getRows()) {
 				Event event = new DeleteEvent();
@@ -97,14 +97,14 @@ public class MySQLBinlogAdapter implements Producer {
 		}
 	}
 
-	private Map<String, Object> dataToMap(String dbName, String tableName, Serializable[] row) throws BusinessException {
+	private Map<String, Object> dataToMap(String dbName, String tableName, Serializable[] row) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		for (int i = 0; i < row.length; i++)
 			map.put(schemaManager.getColumnName(dbName, tableName, i), row[i]);
 		return map;
 	}
 
-	public void changePosition(RotateEventData data) throws BusinessException {
+	public void changePosition(RotateEventData data) {
 		consumer.setPosition(data.getBinlogFilename(), data.getBinlogPosition());
 	}
 }

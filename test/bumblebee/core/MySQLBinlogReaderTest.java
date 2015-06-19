@@ -14,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import bumblebee.core.aux.DummyConsumer;
-import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.SchemaManager;
 import bumblebee.core.reader.MySQLBinlogAdapter;
 
@@ -45,7 +44,7 @@ public class MySQLBinlogReaderTest {
 	private DummyConsumer readerx;
 	private MySQLBinlogAdapter reader;
 
-	@Before public void setup() throws BusinessException {
+	@Before public void setup() {
 		readerx = new DummyConsumer();
 		readerx.setPosition("mysqllog-name", 0L);
 		
@@ -67,7 +66,7 @@ public class MySQLBinlogReaderTest {
 		return tmed;
 	}
 	
-	@Test public void shouldTransformInsertBinlogEventIntoGenericData() throws BusinessException {
+	@Test public void shouldTransformInsertBinlogEventIntoGenericData() {
 		reader.mapTable(tableMap());
 
 		WriteRowsEventData wred = new WriteRowsEventData();
@@ -90,7 +89,7 @@ public class MySQLBinlogReaderTest {
 		assertEquals(new Long(eventHeader().getNextPosition()), readerx.getCurrentLogPosition().getPosition());
 	}
 
-	@Test public void shouldTransformUpdateBinlogEventIntoGenericData() throws BusinessException {
+	@Test public void shouldTransformUpdateBinlogEventIntoGenericData() {
 		reader.mapTable(tableMap());
 
 		UpdateRowsEventData ured = new UpdateRowsEventData();
@@ -122,7 +121,7 @@ public class MySQLBinlogReaderTest {
 		assertEquals(new Long(eventHeader().getNextPosition()), readerx.getCurrentLogPosition().getPosition());
 	}
 	
-	@Test public void shouldTransformDeleteBinlogEventIntoGenericData() throws BusinessException {
+	@Test public void shouldTransformDeleteBinlogEventIntoGenericData() {
 		reader.mapTable(tableMap());
 
 		DeleteRowsEventData dred = new DeleteRowsEventData();
@@ -146,7 +145,7 @@ public class MySQLBinlogReaderTest {
 		assertEquals(new Long(eventHeader().getNextPosition()), readerx.getCurrentLogPosition().getPosition());
 	}
 	
-	@Test public void shouldProcessLogRotateEvent() throws BusinessException {
+	@Test public void shouldProcessLogRotateEvent() {
 		RotateEventData red = new RotateEventData();
 		red.setBinlogFilename("mysql-binlog.000001");
 		red.setBinlogPosition(4L);

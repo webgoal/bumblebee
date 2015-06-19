@@ -2,14 +2,13 @@ package bumblebee.core.interfaces;
 
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.events.Event;
-import bumblebee.core.exceptions.BusinessException;
 
 public interface Consumer {
-	void consume(Event event) throws BusinessException;
-	void setPosition(String logName, long logPosition) throws BusinessException;
-	void setPosition(long logPosition) throws BusinessException;
-	LogPosition getCurrentLogPosition() throws BusinessException;
+	void consume(Event event);
+	void setPosition(String logName, long logPosition);
+	void setPosition(long logPosition);
+	LogPosition getCurrentLogPosition();
 	
-	void commit() throws BusinessException;
-	void rollback() throws BusinessException;
+	void commit();
+	void rollback();
 }

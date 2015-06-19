@@ -31,7 +31,7 @@ public class MySQLPositionManager {
 		this.connection = connection;
 	}
 
-	public LogPosition getCurrentLogPosition() throws BusinessException {
+	public LogPosition getCurrentLogPosition() {
 		try {
 			Statement statement = connection.createStatement();
 			ResultSet query = statement.executeQuery("SELECT binlog_filename, binlog_position FROM " + fullTable);
@@ -42,7 +42,7 @@ public class MySQLPositionManager {
 		}
 	}
 
-	public void update(String logName, Long logPosition) throws BusinessException {
+	public void update(String logName, Long logPosition) {
 		try {
 			String sql = prepareUpdateSQL(logName, logPosition);
 			System.out.println("SQL: " + sql);

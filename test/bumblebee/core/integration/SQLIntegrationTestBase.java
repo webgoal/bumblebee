@@ -21,7 +21,7 @@ public class SQLIntegrationTestBase {
 			connection.close();
 	}
 	
-	protected Connection getFakeConnection() throws BusinessException {
+	protected Connection getFakeConnection() {
 		try {
 			connection = DriverManager.getConnection("jdbc:h2:mem:db1;MODE=MySQL");
 			Statement statement = connection.createStatement();
@@ -34,7 +34,7 @@ public class SQLIntegrationTestBase {
 		}
 	}
 
-	protected void runSQL(String sql) throws BusinessException {
+	protected void runSQL(String sql) {
 		try {
 			connection.createStatement().executeUpdate(sql);
 		} catch (SQLException e) {

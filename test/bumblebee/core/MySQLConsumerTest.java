@@ -19,7 +19,6 @@ import bumblebee.core.applier.MySQLPositionManager;
 import bumblebee.core.events.DeleteEvent;
 import bumblebee.core.events.InsertEvent;
 import bumblebee.core.events.UpdateEvent;
-import bumblebee.core.exceptions.BusinessException;
 
 public class MySQLConsumerTest {
 	
@@ -32,7 +31,7 @@ public class MySQLConsumerTest {
 		conditions.put("id", 2);
 	}
 
-	@Test public void eventToSQLInsertTransformationTest() throws BusinessException, SQLException {
+	@Test public void eventToSQLInsertTransformationTest() throws SQLException {
 		Connection connection = mock(Connection.class);
 		PreparedStatement statement = mock(PreparedStatement.class);
 		doReturn(statement).when(connection).prepareStatement(any());
@@ -51,7 +50,7 @@ public class MySQLConsumerTest {
 		verify(statement).executeUpdate();
 	}
 	
-	@Test public void eventToSQLUpdateTransformationTest() throws BusinessException, SQLException {
+	@Test public void eventToSQLUpdateTransformationTest() throws SQLException {
 		Connection connection = mock(Connection.class);
 		PreparedStatement statement = mock(PreparedStatement.class);
 		doReturn(statement).when(connection).prepareStatement(any());
@@ -72,7 +71,7 @@ public class MySQLConsumerTest {
 		verify(statement).executeUpdate();
 	}
 
-	@Test public void eventToSQLDeleteTransformationTest() throws BusinessException, SQLException {
+	@Test public void eventToSQLDeleteTransformationTest() throws SQLException {
 		Connection connection = mock(Connection.class);
 		PreparedStatement statement = mock(PreparedStatement.class);
 		doReturn(statement).when(connection).prepareStatement(any());

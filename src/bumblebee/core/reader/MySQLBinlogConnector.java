@@ -55,7 +55,7 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 		}
 	}
 
-	public void connect() throws BusinessException {
+	public void connect() {
 		try {
 			client.connect();
 		} catch (IOException ex) {
@@ -67,7 +67,7 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 		try {
 			client.disconnect();
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			throw new BusinessException(ex);
 		}
 	}
 }

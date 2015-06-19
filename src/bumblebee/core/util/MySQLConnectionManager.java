@@ -57,7 +57,7 @@ public class MySQLConnectionManager {
 		return consumerConf.getInt("port");
 	}
 	
-	public static Connection getProducerConnection() throws BusinessException {
+	public static Connection getProducerConnection() {
 		try {
 			if(producerConnection == null || producerConnection.isClosed()) {
 				DriverManager.setLoginTimeout(LOGIN_TIMEOUT);
@@ -70,7 +70,7 @@ public class MySQLConnectionManager {
 		}
 	}
 	
-	public static Connection getConsumerConnection() throws BusinessException {
+	public static Connection getConsumerConnection() {
 		try {
 			if(consumerConnection == null || consumerConnection.isClosed()) {
 				DriverManager.setLoginTimeout(LOGIN_TIMEOUT);

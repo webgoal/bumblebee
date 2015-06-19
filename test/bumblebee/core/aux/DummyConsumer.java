@@ -2,7 +2,6 @@ package bumblebee.core.aux;
 
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.events.Event;
-import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.Consumer;
 
 public class DummyConsumer implements Consumer {
@@ -17,10 +16,10 @@ public class DummyConsumer implements Consumer {
 		lastEvent = event;
 	}
 
-	@Override public void setPosition(String logName, long logPosition) throws BusinessException {
+	@Override public void setPosition(String logName, long logPosition) {
 		this.lastPosition = new LogPosition(logName, logPosition);
 	}
-	@Override public void setPosition(long logPosition) throws BusinessException {
+	@Override public void setPosition(long logPosition) {
 		this.lastPosition = new LogPosition(lastPosition.getFilename(), logPosition);
 	}
 	@Override public LogPosition getCurrentLogPosition() {

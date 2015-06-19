@@ -19,7 +19,7 @@ public class MySQLSchemaManager implements SchemaManager {
 		this.connection = connection;
 	}
 	
-	@Override public String getColumnName(String dbName, String tableName, int index) throws BusinessException {
+	@Override public String getColumnName(String dbName, String tableName, int index) {
 		String fullTableName = dbName + "/" + tableName;
 		if (!tableSchemas.containsKey(fullTableName))
 			tableSchemas.put(fullTableName, loadTableSchema(dbName, tableName));
@@ -37,8 +37,8 @@ public class MySQLSchemaManager implements SchemaManager {
 			ResultSet columnsMetaData = meta.getColumns(dbName, null, tableName, null);
 			while(columnsMetaData.next())
 				columns.add(columnsMetaData.getString("COLUMN_NAME"));
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception ex) {
+			throw new BusinessException(ex);
 		}
 		return columns;
 	}

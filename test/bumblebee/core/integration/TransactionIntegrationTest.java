@@ -1,14 +1,13 @@
 package bumblebee.core.integration;
 
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.junit.Assert.fail;
 
 import java.io.Serializable;
-import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -24,7 +23,7 @@ import com.github.shyiko.mysql.binlog.event.WriteRowsEventData;
 
 public class TransactionIntegrationTest {
 
-	@Test public void shouldCommitAfterConsumeEvent() throws BusinessException, SQLException {
+	@Test public void shouldCommitAfterConsumeEvent() {
 		Consumer consumer = mock(Consumer.class);
 		
 		MySQLBinlogAdapter producer = new MySQLBinlogAdapter(consumer, mock(SchemaManager.class));
@@ -42,7 +41,7 @@ public class TransactionIntegrationTest {
 		verify(consumer, never()).rollback();
 	}
 
-	@Test public void shouldRollbackIfAnExceptionIsThrown() throws BusinessException {
+	@Test public void shouldRollbackIfAnExceptionIsThrown() {
 		Consumer consumer = mock(Consumer.class);
 		doThrow(BusinessException.class).when(consumer).consume(any());
 		

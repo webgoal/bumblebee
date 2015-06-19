@@ -23,37 +23,37 @@ public class MySQLConsumer implements Consumer {
 		this.positionManager = positionManager;
 	}
 	
-	@Override public void consume(Event event) throws BusinessException {
+	@Override public void consume(Event event) {
 		if (event.isInsert()) insert(event);
 		if (event.isUpdate()) update(event);
 		if (event.isDelete()) delete(event);
 	}
 	
-	private void insert(Event event) throws BusinessException {
+	private void insert(Event event) {
 		executeSql(prepareInsertSQL(event), event.getData().values(), Collections.emptyList());
 	}
 	
-	private void update(Event event) throws BusinessException {
+	private void update(Event event) {
 		executeSql(prepareUpdateSQL(event), event.getData().values(), event.getConditions().values());
 	}
 
-	private void delete(Event event) throws BusinessException {
+	private void delete(Event event) {
 		executeSql(prepareDeleteSQL(event), Collections.emptyList(), event.getConditions().values());
 	}
 	
-	@Override public void setPosition(String logName, long logPosition) throws BusinessException {
+	@Override public void setPosition(String logName, long logPosition) {
 		positionManager.update(logName, logPosition);
 	}
 	
-	@Override public void setPosition(long logPosition) throws BusinessException {
+	@Override public void setPosition(long logPosition) {
 		positionManager.update(getCurrentLogPosition().getFilename(), logPosition);
 	}
 	
-	@Override public LogPosition getCurrentLogPosition() throws BusinessException {
+	@Override public LogPosition getCurrentLogPosition() {
 		return positionManager.getCurrentLogPosition();
 	}
 	
-	@Override public void commit() throws BusinessException {
+	@Override public void commit() {
 		try {
 			MySQLConnectionManager.getConsumerConnection().commit();
 		} catch (SQLException ex) {
@@ -61,7 +61,7 @@ public class MySQLConsumer implements Consumer {
 		}
 	}
 	
-	@Override public void rollback() throws BusinessException {
+	@Override public void rollback() {
 		try {
 			MySQLConnectionManager.getConsumerConnection().rollback();
 		} catch (SQLException ex) {
@@ -69,7 +69,7 @@ public class MySQLConsumer implements Consumer {
 		}
 	}
 
-	private void executeSql(String sql, Collection<Object> data, Collection<Object> conditions) throws BusinessException {
+	private void executeSql(String sql, Collection<Object> data, Collection<Object> conditions) {
 		try {
 			System.out.println("SQL: " + sql);
 			PreparedStatement stmt = connection.prepareStatement(sql);
@@ -88,15 +88,15 @@ public class MySQLConsumer implements Consumer {
 		return object;
 	}
 
-	private String prepareInsertSQL(Event event) throws BusinessException {
+	private String prepareInsertSQL(Event event) {
 		return "INSERT INTO " + databaseAndTable(event) + " SET " + fields(event);
 	}
 
-	private String prepareUpdateSQL(Event event) throws BusinessException {
+	private String prepareUpdateSQL(Event event) {
 		return "UPDATE " + databaseAndTable(event) + " SET " + fields(event) + " WHERE " + conditions(event);
 	}
 
-	private String prepareDeleteSQL(Event event) throws BusinessException {
+	private String prepareDeleteSQL(Event event) {
 		return "DELETE FROM " + databaseAndTable(event) + " WHERE " + conditions(event);
 	}
 
@@ -104,11 +104,11 @@ public class MySQLConsumer implements Consumer {
 		return event.getNamespace() + "." + event.getCollection();
 	}
 
-	private String fields(Event event) throws BusinessException {
+	private String fields(Event event) {
 		return serializeMap(event.getData(), ", ");
 	}
 
-	private String conditions(Event event) throws BusinessException {
+	private String conditions(Event event) {
 		return serializeMap(event.getConditions(), " AND ");
 	}
 	
