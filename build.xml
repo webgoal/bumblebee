@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Bumblebee" default="jar">
+   <description>Bumblebee</description>
+
+   <property name="javac.debug" value="true" />
+   <property name="bumblebee.libs" value="libs" />
+   <property name="bumblebee.src" value="src" />
+   <property name="bumblebee.dist" value="dist" />
+   <property name="bumblebee.classes" value="bin" />
+   <property name="bumblebee.javadoc" value="${bumblebee.dist}/javadoc" />
+
+   <property name="bumblebee.jar.name" value="bumblebee.jar" />
+   <property name="bumblebee.jar.filesonly" value="true" />
+
+   <path id="bumblebee.classpath">
+       <fileset dir="${bumblebee.libs}" includes="**/*.jar" />
+   </path>
+
+   <path id="bumblebee.classpath.test">
+       <path refid="bumblebee.classpath" />
+       <pathelement location="${bumblebee.classes}" />
+   </path>
+
+   <target name="init">
+       <tstamp />
+       <mkdir dir="${bumblebee.classes}" />
+       <mkdir dir="${bumblebee.dist}" />
+   </target> 
+
+   <target name="compile" depends="init">
+       <javac
+			includeantruntime="false"
+			srcdir="${bumblebee.src}"
+			includes="**/*.java"
+			destdir="${bumblebee.classes}"
+			classpathref="bumblebee.classpath" />
+   </target>
+
+   <target name="jar"
+           description="Package compiled classes into JAR file"
+           depends="clean,compile">
+      <jar destfile="${bumblebee.dist}/${bumblebee.jar.name}"
+           basedir="${bumblebee.classes}"
+           filesonly="${bumblebee.jar.filesonly}">
+      </jar>
+   </target>
+   
+   <target name="test" depends="clean,compile">
+     <junit failureProperty="test.failure">
+       <classpath refid="bumblebee.classpath.test" />
+       <batchtest>
+          <fileset dir="${bumblebee.classes}" includes="**/*Test.class" />
+       </batchtest>
+       <formatter type="brief" usefile="false"/>
+     </junit>
+     <fail message="test failed" if="test.failure" />
+   </target>
+
+   <target name="javadoc" description="Generate Javadoc-based documentation">
+      <mkdir dir="${bumblebee.javadoc}" />
+      <javadoc doctitle="Httprevayller"
+               destdir="${bumblebee.javadoc}"
+               sourcepath="${bumblebee.src}"
+               classpathref="bumblebee.classpath"
+               private="true"
+               author="Webgoal" />
+   </target>
+
+   <target name="clean" description="Remove generated artifacts.">
+      <delete dir="${bumblebee.classes}" />
+      <delete dir="${bumblebee.dist}" />
+   </target>
+
+</project>
