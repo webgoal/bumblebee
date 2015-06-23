@@ -6,8 +6,9 @@
    <property name="bumblebee.libs" value="libs" />
    <property name="bumblebee.src" value="src" />
    <property name="bumblebee.dist" value="dist" />
-   <property name="bumblebee.classes" value="bin" />
-   <property name="bumblebee.javadoc" value="${bumblebee.dist}/javadoc" />
+   <property name="bumblebee.test" value="test" />
+   <property name="bumblebee.classes" value="bin-dist" />
+   <property name="bumblebee.javadoc" value="javadoc" />
 
    <property name="bumblebee.jar.name" value="bumblebee.jar" />
    <property name="bumblebee.jar.filesonly" value="true" />
@@ -18,7 +19,8 @@
 
    <path id="bumblebee.classpath.test">
        <path refid="bumblebee.classpath" />
-       <pathelement location="${bumblebee.classes}" />
+   	   <pathelement location="${bumblebee.classes}" />
+   	   <pathelement location="${bumblebee.test}" />
    </path>
 
    <target name="init">
@@ -46,10 +48,16 @@
    </target>
    
    <target name="test" depends="clean,compile">
-     <junit failureProperty="test.failure">
-       <classpath refid="bumblebee.classpath.test" />
+   	<javac
+		includeantruntime="false"
+		srcdir="${bumblebee.test}"
+		includes="**/*.java"
+		destdir="${bumblebee.classes}"
+		classpathref="bumblebee.classpath" />
+   	<junit failureProperty="test.failure">
+   	   <classpath refid="bumblebee.classpath.test" />
        <batchtest>
-          <fileset dir="${bumblebee.classes}" includes="**/*Test.class" />
+          <fileset dir="${bumblebee.test}" includes="**/*Test.java" />
        </batchtest>
        <formatter type="brief" usefile="false"/>
      </junit>
@@ -58,7 +66,7 @@
 
    <target name="javadoc" description="Generate Javadoc-based documentation">
       <mkdir dir="${bumblebee.javadoc}" />
-      <javadoc doctitle="Httprevayller"
+      <javadoc doctitle="Bumblebee"
                destdir="${bumblebee.javadoc}"
                sourcepath="${bumblebee.src}"
                classpathref="bumblebee.classpath"
