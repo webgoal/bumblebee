@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Logger;
 
 import bumblebee.core.exceptions.BusinessException;
 
@@ -22,8 +23,10 @@ public class MySQLPositionManager {
 
 	private String fullTable;
 	private Connection connection;
+	private Logger logger;
 
 	public MySQLPositionManager(String db, String table) {
+		logger = Logger.getLogger(getClass().getName());
 		this.fullTable = db.isEmpty() ? table : db + "." + table;
 	}
 
@@ -45,7 +48,7 @@ public class MySQLPositionManager {
 	public void update(String logName, Long logPosition) {
 		try {
 			String sql = prepareUpdateSQL(logName, logPosition);
-			System.out.println("SQL: " + sql);
+			logger.info("SQL: " + sql);
 			Statement statement = connection.createStatement();
 			statement.executeUpdate(sql);
 		} catch (SQLException e) {

@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.events.Event;
@@ -17,8 +18,10 @@ public class MySQLConsumer implements Consumer {
 	
 	private Connection connection;
 	private MySQLPositionManager positionManager;
+	private Logger logger;
 	
 	public MySQLConsumer(Connection connection, MySQLPositionManager positionManager) {
+		logger = Logger.getLogger(getClass().getName());
 		this.connection = connection;
 		this.positionManager = positionManager;
 	}
@@ -71,12 +74,12 @@ public class MySQLConsumer implements Consumer {
 
 	private void executeSql(String sql, Collection<Object> data, Collection<Object> conditions) {
 		try {
-			System.out.println("SQL: " + sql);
+			logger.info("SQL: " + sql);
 			PreparedStatement stmt = connection.prepareStatement(sql);
 			int counter = 1;
 			for (Object v : data)       stmt.setObject(counter++, fixType(v));
 			for (Object v : conditions) stmt.setObject(counter++, fixType(v));
-			System.err.println(stmt.toString());
+			logger.info(stmt.toString());
 			stmt.executeUpdate();
 		} catch (SQLException e) {
 			throw new BusinessException(e);
