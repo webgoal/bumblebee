@@ -30,10 +30,10 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 				logger.info("Desconectou!");
 			}
 			@Override public void onEventDeserializationFailure(BinaryLogClient client, Exception ex) {
-				logger.info("Falha na desserialização!");
+				logger.severe("Falha na desserialização!");
 			}
 			@Override public void onCommunicationFailure(BinaryLogClient client, Exception ex) {
-				logger.info("Falha na comunicação!");
+				logger.severe("Falha na comunicação!");
 			}
 		});
 		client.registerEventListener(this);

@@ -12,7 +12,6 @@ import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.events.Event;
 import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.Consumer;
-import bumblebee.core.util.MySQLConnectionManager;
 
 public class MySQLConsumer implements Consumer {
 	
@@ -58,7 +57,7 @@ public class MySQLConsumer implements Consumer {
 	
 	@Override public void commit() {
 		try {
-			MySQLConnectionManager.getConsumerConnection().commit();
+			connection.commit();
 		} catch (SQLException ex) {
 			throw new BusinessException(ex);
 		}
@@ -66,7 +65,7 @@ public class MySQLConsumer implements Consumer {
 	
 	@Override public void rollback() {
 		try {
-			MySQLConnectionManager.getConsumerConnection().rollback();
+			connection.rollback();
 		} catch (SQLException ex) {
 			throw new BusinessException(ex);
 		}
@@ -79,7 +78,7 @@ public class MySQLConsumer implements Consumer {
 			int counter = 1;
 			for (Object v : data)       stmt.setObject(counter++, fixType(v));
 			for (Object v : conditions) stmt.setObject(counter++, fixType(v));
-			logger.info(stmt.toString());
+			logger.warning(stmt.toString());
 			stmt.executeUpdate();
 		} catch (SQLException e) {
 			throw new BusinessException(e);

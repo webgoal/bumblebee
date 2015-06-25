@@ -2,6 +2,7 @@ package bumblebee.core.util;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 
 import bumblebee.core.exceptions.BusinessException;
 
@@ -10,8 +11,9 @@ import com.typesafe.config.ConfigFactory;
 
 public class MySQLConnectionManager {
 	private static final int LOGIN_TIMEOUT = 5;
-	private static Connection producerConnection;
+	
 	private static Connection consumerConnection;
+	private static Connection producerConnection;
 	
 	private static Config producerConf;
 	private static Config consumerConf;
@@ -41,6 +43,10 @@ public class MySQLConnectionManager {
 		return producerConf.getInt("port");
 	}
 	
+	public static String getProducerDatabase() {
+		return producerConf.getString("database");
+	}
+	
 	public static String getConsumerHost() {
 		return consumerConf.getString("host");
 	}
@@ -57,29 +63,35 @@ public class MySQLConnectionManager {
 		return consumerConf.getInt("port");
 	}
 	
+	public static String getConsumerDatabase() {
+		return consumerConf.getString("database");
+	}
+	
 	public static Connection getProducerConnection() {
 		try {
-			if(producerConnection == null || producerConnection.isClosed()) {
-				DriverManager.setLoginTimeout(LOGIN_TIMEOUT);
-				producerConnection = DriverManager.getConnection("jdbc:mysql://" + getProducerHost() + ":" + getProducerPort(), getProducerUser(), getProducerPass());
-				producerConnection.setAutoCommit(false);
-			}
+			if (producerConnection == null || producerConnection.isClosed())
+				producerConnection = getConnection(getProducerDatabase(), getProducerHost(), getProducerPort(), getProducerUser(), getProducerPass());
 			return producerConnection;
-		} catch (Exception e) {
+		} catch (SQLException e) {
 			throw new BusinessException(e);
 		}
 	}
 	
 	public static Connection getConsumerConnection() {
 		try {
-			if(consumerConnection == null || consumerConnection.isClosed()) {
-				DriverManager.setLoginTimeout(LOGIN_TIMEOUT);
-				consumerConnection = DriverManager.getConnection("jdbc:mysql://" + getConsumerHost() + ":" + getConsumerPort(), getConsumerUser(), getConsumerPass());
-				consumerConnection.setAutoCommit(false);
-			}
+			if (consumerConnection == null || consumerConnection.isClosed())
+				consumerConnection = getConnection(getConsumerDatabase(), getConsumerHost(), getConsumerPort(), getConsumerUser(), getConsumerPass());
 			return consumerConnection;
-		} catch (Exception e) {
+		} catch (SQLException e) {
 			throw new BusinessException(e);
 		}
+	}
+
+	private static Connection getConnection(String database, String host, int port, String user, String pass) throws SQLException {
+		DriverManager.setLoginTimeout(LOGIN_TIMEOUT);
+		Connection consumerConnection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port, user, pass);
+		consumerConnection.setCatalog(database);
+		consumerConnection.setAutoCommit(false);
+		return consumerConnection;
 	}
 }
