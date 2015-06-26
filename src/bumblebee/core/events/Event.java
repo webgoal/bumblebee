@@ -3,7 +3,7 @@ package bumblebee.core.events;
 import java.util.Collections;
 import java.util.Map;
 
-public class Event {
+public abstract class Event {
 
 	private String namespace;
 	private String collection;
