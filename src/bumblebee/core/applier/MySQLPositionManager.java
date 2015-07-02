@@ -39,7 +39,10 @@ public class MySQLPositionManager {
 			Statement statement = connection.createStatement();
 			ResultSet query = statement.executeQuery("SELECT binlog_filename, binlog_position FROM " + fullTable);
 			query.first();
-			return new LogPosition(query.getString("binlog_filename"), query.getLong("binlog_position"));
+			LogPosition position = new LogPosition(query.getString("binlog_filename"), query.getLong("binlog_position"));
+			query.close();
+			statement.close();
+			return position;
 		} catch (SQLException e) {
 			throw new BusinessException(e);
 		}
@@ -51,6 +54,7 @@ public class MySQLPositionManager {
 			logger.info("SQL: " + sql);
 			Statement statement = connection.createStatement();
 			statement.executeUpdate(sql);
+			statement.close();
 		} catch (SQLException e) {
 			throw new BusinessException(e);
 		}

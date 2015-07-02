@@ -80,6 +80,7 @@ public class MySQLConsumer implements Consumer {
 			for (Object v : conditions) stmt.setObject(counter++, fixType(v));
 			logger.warning(stmt.toString());
 			stmt.executeUpdate();
+			stmt.close();
 		} catch (SQLException e) {
 			throw new BusinessException(e);
 		}

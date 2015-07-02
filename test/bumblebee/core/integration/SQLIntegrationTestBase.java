@@ -28,6 +28,7 @@ public class SQLIntegrationTestBase {
 			statement.executeUpdate("CREATE TABLE log_position (id INT, binlog_filename varchar(30), binlog_position LONG)");
 			statement.executeUpdate("CREATE TABLE test (id INT AUTO_INCREMENT, name varchar(30))");
 			statement.executeUpdate("INSERT INTO log_position VALUES (1, 'mysql-bin.000001', 4)");
+			statement.close();
 			return connection;
 		} catch (Exception e) {
 			throw new BusinessException(e);

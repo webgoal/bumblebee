@@ -37,6 +37,7 @@ public class MySQLSchemaManager implements SchemaManager {
 			ResultSet columnsMetaData = meta.getColumns(dbName, null, tableName, null);
 			while(columnsMetaData.next())
 				columns.add(columnsMetaData.getString("COLUMN_NAME"));
+			columnsMetaData.close();
 		} catch (Exception ex) {
 			throw new BusinessException(ex);
 		}
