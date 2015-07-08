@@ -11,10 +11,9 @@ import java.util.logging.Logger;
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.events.Event;
 import bumblebee.core.exceptions.BusinessException;
-import bumblebee.core.interfaces.Consumer;
 
 
-public class MySQLConsumer implements Consumer {
+public class MySQLConsumer extends AbstractConsumer {
 	
 	private Connection connection;
 	private MySQLPositionManager positionManager;
@@ -26,21 +25,15 @@ public class MySQLConsumer implements Consumer {
 		this.positionManager = positionManager;
 	}
 	
-	@Override public void consume(Event event) {
-		if (event.isInsert()) insert(event);
-		if (event.isUpdate()) update(event);
-		if (event.isDelete()) delete(event);
-	}
-	
-	private void insert(Event event) {
+	protected void insert(Event event) {
 		executeSql(prepareInsertSQL(event), event.getData().values(), Collections.emptyList());
 	}
 	
-	private void update(Event event) {
+	protected void update(Event event) {
 		executeSql(prepareUpdateSQL(event), event.getData().values(), event.getConditions().values());
 	}
 
-	private void delete(Event event) {
+	protected void delete(Event event) {
 		executeSql(prepareDeleteSQL(event), Collections.emptyList(), event.getConditions().values());
 	}
 	
