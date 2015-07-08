@@ -1,4 +1,10 @@
-bin
-bin-dist
-dist
+.gradle
 
+build/
+bin/
+
+gradle-app.setting
+
+!gradle-wrapper.jar
+
+.DS_Store

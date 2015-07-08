@@ -13,6 +13,7 @@ import bumblebee.core.events.Event;
 import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.Consumer;
 
+
 public class MySQLConsumer implements Consumer {
 	
 	private Connection connection;

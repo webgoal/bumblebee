@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="test"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="libs/mysql-binlog-connector-java-0.2.1.jar" sourcepath="libs/mysql-binlog-connector-java-0.2.1-sources.jar"/>
-	<classpathentry kind="lib" path="libs/mysql-connector-java-5.1.35.jar"/>
-	<classpathentry kind="lib" path="libs/h2-1.4.187.jar"/>
-	<classpathentry kind="lib" path="libs/mockito-all-2.0.2-beta.jar"/>
-	<classpathentry kind="lib" path="libs/config-1.3.0.jar" sourcepath="libs/config-1.3.0-sources.jar"/>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/main/resources"/>
+	<classpathentry kind="src" path="src/test/java"/>
+	<classpathentry kind="src" path="src/test/resources"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="con" path="org.springsource.ide.eclipse.gradle.classpathcontainer"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
