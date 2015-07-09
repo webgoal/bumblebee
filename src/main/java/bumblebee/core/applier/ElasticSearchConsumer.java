@@ -1,12 +1,18 @@
 package bumblebee.core.applier;
 
+import java.io.IOException;
+
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.events.Event;
+import bumblebee.core.exceptions.BusinessException;
 
 public class ElasticSearchConsumer extends RESTConsumer {
 	private Client elasticSearchClient;
@@ -16,17 +22,28 @@ public class ElasticSearchConsumer extends RESTConsumer {
 	}
 
 	@Override public void setPosition(String logName, long logPosition) {
-		// TODO Auto-generated method stub
-		
+		IndexRequestBuilder request = elasticSearchClient.prepareIndex("consumer_position", "log_position", "1");
+
+		try {
+			XContentBuilder builder = XContentFactory.jsonBuilder();
+			builder.startObject();
+			builder.field("logName", logName);
+			builder.field("logPosition", logPosition);
+			builder.endObject();
+			request.setSource(builder.string());
+			request.get();
+		} catch (IOException e) {
+			throw new BusinessException(e);
+		}
 	}
 
 	@Override public void setPosition(long logPosition) {
-		// TODO Auto-generated method stub
-		
+		UpdateRequestBuilder request = elasticSearchClient.prepareUpdate("consumer_position", "log_position", "1");
+		request.setDoc("{\"logPosition\": "+ logPosition +"}");
+		request.get();
 	}
 
 	@Override public LogPosition getCurrentLogPosition() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

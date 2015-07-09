@@ -24,7 +24,7 @@ public class ElasticSearchConsumerTest {
 	private Map<String, Object> conditions = new LinkedHashMap<String, Object>();
 	private Client client = mock(Client.class);;
 	private ElasticSearchConsumer consumer = new ElasticSearchConsumer(client);;
-	
+
 	@Before public void setup() {
 		data.put("id", 1);
 		data.put("name", "Someone");
@@ -46,7 +46,7 @@ public class ElasticSearchConsumerTest {
 		verify(request).setSource(data);
 		verify(request).get();
 	}
-	
+
 	@Test public void eventToUpdateTest() {
 		UpdateEvent updateEvent = new UpdateEvent();
 		updateEvent.setNamespace("namespace");
@@ -62,7 +62,7 @@ public class ElasticSearchConsumerTest {
 		verify(request).setDoc(data);
 		verify(request).get();
 	}
-	
+
 	@Test public void eventToDeleteTest() {
 		DeleteEvent deleteEvent = new DeleteEvent();
 		deleteEvent.setNamespace("namespace");
@@ -76,6 +76,31 @@ public class ElasticSearchConsumerTest {
 
 		verify(client).prepareDelete(deleteEvent.getNamespace(), deleteEvent.getCollection(), data.get("id").toString());
 		verify(request).setId(data.get("id").toString());
+		verify(request).get();
+	}
+
+	@Test public void setCompletePositionTest() {
+		IndexRequestBuilder request = mock(IndexRequestBuilder.class);
+		doReturn(request).when(client).prepareIndex("consumer_position", "log_position", "1");
+		String name = "name";
+		Long position = 4L;
+
+		consumer.setPosition(name, position);
+
+		verify(client).prepareIndex("consumer_position", "log_position", "1");
+		verify(request).setSource("{\"logName\":\"" + name + "\",\"logPosition\":" + position + "}");
+		verify(request).get();
+	}
+
+	@Test public void setOnlyPositionTest() {
+		UpdateRequestBuilder request = mock(UpdateRequestBuilder.class);
+		doReturn(request).when(client).prepareUpdate("consumer_position", "log_position", "1");
+		Long position = 4L;
+
+		consumer.setPosition(position);
+
+		verify(client).prepareUpdate("consumer_position", "log_position", "1");
+		verify(request).setDoc("{\"logPosition\": 4}");
 		verify(request).get();
 	}
 }
