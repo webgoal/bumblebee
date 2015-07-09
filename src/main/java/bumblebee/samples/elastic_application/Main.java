@@ -6,9 +6,7 @@ import java.util.Map;
 
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequestBuilder;
 import org.elasticsearch.action.get.GetRequestBuilder;
-import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
-import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.ImmutableSettings;
@@ -19,10 +17,12 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 
 public class Main {
 
+	private static TransportClient transportClient;
+
 	public static void main(String[] args) throws IOException {
 		//Create Client
 		Settings settings = ImmutableSettings.settingsBuilder().put("cluster.name", "elasticsearch").build();
-		TransportClient transportClient = new TransportClient(settings);
+		transportClient = new TransportClient(settings);
 		transportClient = transportClient.addTransportAddress(new InetSocketTransportAddress("localhost", 9300));
 		Client client = (Client) transportClient;
 
@@ -44,13 +44,9 @@ public class Main {
 		data.put("name", "tots");
 		data.put("id", 10);
 		indexRequestBuilder.setSource(data);
-		IndexResponse iResponse = indexRequestBuilder.execute().actionGet();
-
 		//Get document
 		GetRequestBuilder getRequestBuilder = client.prepareGet("test", "licit", "1");
 		getRequestBuilder.setFields(new String[]{"name"});
-		GetResponse response = getRequestBuilder.execute().actionGet();
-		String name = response.getField("name").getValue().toString();
 	}
 
 }

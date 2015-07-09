@@ -6,8 +6,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Logger;
 
-import org.elasticsearch.common.bytes.BytesReference;
-
 import bumblebee.core.exceptions.BusinessException;
 
 public class MySQLPositionManager {
