@@ -9,6 +9,7 @@ import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.indices.IndexMissingException;
 
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.events.Event;
@@ -44,7 +45,12 @@ public class ElasticSearchConsumer extends RESTConsumer {
 	}
 
 	@Override public LogPosition getCurrentLogPosition() {
-		return null;
+		try {
+			GetResponse response = elasticSearchClient.prepareGet("consumer_position", "log_position", "1").execute().actionGet();
+			return new LogPosition(response.getSource().get("logName").toString(), Long.parseLong(response.getSource().get("logPosition").toString()));
+		} catch (IndexMissingException | NullPointerException e) {
+			throw new BusinessException(e);
+		}
 	}
 
 	@Override protected void insert(Event event) {
