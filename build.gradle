@@ -12,7 +12,7 @@ jar {
 
 repositories {
     mavenCentral()
-    jcenter()
+    //jcenter()
 }
 
 dependencies {

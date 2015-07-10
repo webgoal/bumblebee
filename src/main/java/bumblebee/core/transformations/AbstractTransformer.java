@@ -4,11 +4,11 @@ import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.interfaces.Consumer;
 import bumblebee.core.interfaces.Transformer;
 
-public abstract class MySQLAbstractTransformer implements Transformer {
+public abstract class AbstractTransformer implements Transformer {
 
 	protected Consumer consumer;
 	
-	public MySQLAbstractTransformer(Consumer consumer) {
+	public AbstractTransformer(Consumer consumer) {
 		this.consumer = consumer;
 	}
 

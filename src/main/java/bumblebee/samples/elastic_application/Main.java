@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequestBuilder;
-import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
@@ -38,15 +37,15 @@ public class Main {
 		IndexRequestBuilder indexRequestBuilder = client.prepareIndex("test", "licit", "1");
 		//build json object
 		XContentBuilder contentBuilder = XContentFactory.jsonBuilder().startObject().prettyPrint();
-		contentBuilder.field("name", "jai");
+		contentBuilder.field("name", "jasdasdasdasdasdai");
 		contentBuilder.endObject();
 		Map <String, Object> data = new LinkedHashMap<String, Object>();
 		data.put("name", "tots");
 		data.put("id", 10);
-		indexRequestBuilder.setSource(data);
+		indexRequestBuilder.setSource(data).get();
 		//Get document
-		GetRequestBuilder getRequestBuilder = client.prepareGet("test", "licit", "1");
-		getRequestBuilder.setFields(new String[]{"name"});
+//		GetRequestBuilder getRequestBuilder = client.prepareGet("test", "licit", "1");
+//		getRequestBuilder.setFields(new String[]{"name"});
 	}
 
 }
