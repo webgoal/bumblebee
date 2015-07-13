@@ -45,8 +45,8 @@ public abstract class Event {
 	}
 
 	@Override public String toString() {
-		return "bumblebee.core.Event [namespace=" + namespace
-				+ ", collection=" + collection + ", data=" + data + ", conditions="  + conditions+ "]";
+		return "bumblebee.core.Event [namespace=" + getNamespace()
+				+ ", collection=" + getCollection() + ", data=" + getData() + ", conditions="  + getConditions() + "]";
 	}
 	
 	public boolean isInsert() {

@@ -44,7 +44,7 @@ public class ElasticSearchConsumerTest {
 
 		verify(client).prepareIndex(insertEvent.getNamespace(), insertEvent.getCollection(), data.get("id").toString());
 		verify(request).setSource(data);
-		verify(request).get();
+		verify(request).execute();
 	}
 
 	@Test public void eventToUpdateTest() {
@@ -60,7 +60,7 @@ public class ElasticSearchConsumerTest {
 
 		verify(client).prepareUpdate(updateEvent.getNamespace(), updateEvent.getCollection(), data.get("id").toString());
 		verify(request).setDoc(data);
-		verify(request).get();
+		verify(request).execute();
 	}
 
 	@Test public void eventToDeleteTest() {
@@ -76,7 +76,7 @@ public class ElasticSearchConsumerTest {
 
 		verify(client).prepareDelete(deleteEvent.getNamespace(), deleteEvent.getCollection(), data.get("id").toString());
 		verify(request).setId(data.get("id").toString());
-		verify(request).get();
+		verify(request).execute();
 	}
 
 	@Test public void setCompletePositionTest() {
