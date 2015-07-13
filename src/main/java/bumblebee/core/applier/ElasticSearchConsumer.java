@@ -11,14 +11,18 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.indices.IndexMissingException;
 
+import com.sun.istack.internal.logging.Logger;
+
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.events.Event;
 import bumblebee.core.exceptions.BusinessException;
 
 public class ElasticSearchConsumer extends RESTConsumer {
 	private Client elasticSearchClient;
+	private Logger logger;
 
 	public ElasticSearchConsumer(Client elasticSearchClient) {
+		logger = Logger.getLogger(getClass());
 		this.elasticSearchClient = elasticSearchClient;
 	}
 
@@ -54,18 +58,24 @@ public class ElasticSearchConsumer extends RESTConsumer {
 	}
 
 	@Override protected void insert(Event event) {
+		logger.warning("Insert: " + event);
+		logger.warning("Insert(data): " + event.getData());
 		IndexRequestBuilder request = elasticSearchClient.prepareIndex(event.getNamespace(), event.getCollection(), event.getData().get("id").toString());
 		request.setSource(event.getData());
 		request.get();
 	}
 
 	@Override protected void update(Event event) {
+		logger.warning("Update: " + event);
+		logger.warning("Update(data): " + event.getData());
 		UpdateRequestBuilder request = elasticSearchClient.prepareUpdate(event.getNamespace(), event.getCollection(), event.getData().get("id").toString());
 		request.setDoc(event.getData());
 		request.get();
 	}
 
 	@Override protected void delete(Event event) {
+		logger.warning("Update: " + event);
+		logger.warning("Update(data): " + event.getData());
 		DeleteRequestBuilder request = elasticSearchClient.prepareDelete(event.getNamespace(), event.getCollection(), event.getData().get("id").toString());
 		request.setId(event.getData().get("id").toString());
 		request.get();
