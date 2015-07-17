@@ -1,3 +1,8 @@
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
@@ -43,3 +48,19 @@ uploadArchives {
        }
     }
 }
+
+task copyToLib() {
+    configurations.testCompile.copy().allDependencies.each {dep ->
+        String jarFileName = dep.name + "-" + dep.version + ".jar"
+        String directory = "dist/lib/"
+        String jarFilePath = directory + jarFileName
+        configurations.testCompile.each { File path ->
+        	String newJarFilePath = directory + path.name
+        	if(!new File(newJarFilePath).exists()){
+                Files.copy(path.toPath(), FileSystems.getDefault().getPath(newJarFilePath));
+            }
+        }
+    }
+}
+
+jar.dependsOn('copyToLib')
