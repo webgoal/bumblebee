@@ -1,6 +1,7 @@
 package bumblebee.core.applier;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
@@ -11,8 +12,6 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.indices.IndexMissingException;
 
-import com.sun.istack.internal.logging.Logger;
-
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.events.Event;
 import bumblebee.core.exceptions.BusinessException;
@@ -22,7 +21,7 @@ public class ElasticSearchConsumer extends RESTConsumer {
 	private Logger logger;
 
 	public ElasticSearchConsumer(Client elasticSearchClient) {
-		logger = Logger.getLogger(getClass());
+		logger = Logger.getLogger(getClass().getName());
 		this.elasticSearchClient = elasticSearchClient;
 	}
 

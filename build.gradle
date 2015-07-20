@@ -52,8 +52,10 @@ uploadArchives {
 task copyToLib() {
     configurations.testCompile.copy().allDependencies.each {dep ->
         String jarFileName = dep.name + "-" + dep.version + ".jar"
-        String directory = "dist/lib/"
-        String jarFilePath = directory + jarFileName
+        String directory = "./dist/lib/"
+        if(!new File(directory).exists()){
+            new File(directory).mkdirs();
+        }
         configurations.testCompile.each { File path ->
         	String newJarFilePath = directory + path.name
         	if(!new File(newJarFilePath).exists()){
