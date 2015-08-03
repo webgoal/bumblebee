@@ -60,21 +60,21 @@ public class ElasticSearchConsumer extends RESTConsumer {
 		logger.warning("Insert: ns = " + event.getNamespace() + ", collection: " + event.getCollection() + " valid: " + event.isInsert() + " id: " + event.getData().get("id"));
 		IndexRequestBuilder request = elasticSearchClient.prepareIndex(event.getNamespace(), event.getCollection(), event.getData().get("id").toString());
 		request.setSource(event.getData());
-		request.execute();
+		request.get();
 	}
 
 	@Override protected void update(Event event) {
 		logger.warning("Update: ns: " + event.getNamespace() + ", collection: " + event.getCollection() + " valid: " + event.isUpdate() + " id: " + event.getData().get("id"));
 		UpdateRequestBuilder request = elasticSearchClient.prepareUpdate(event.getNamespace(), event.getCollection(), event.getData().get("id").toString());
 		request.setDoc(event.getData());
-		request.execute();
+		request.get();
 	}
 
 	@Override protected void delete(Event event) {
 		logger.warning("Delete: ns = " + event.getNamespace() + ", collection: " + event.getCollection() + " valid: " + event.isDelete() + " id: " + event.getData().get("id"));
 		DeleteRequestBuilder request = elasticSearchClient.prepareDelete(event.getNamespace(), event.getCollection(), event.getData().get("id").toString());
 		request.setId(event.getData().get("id").toString());
-		request.execute();
+		request.get();
 	}
 
 }
