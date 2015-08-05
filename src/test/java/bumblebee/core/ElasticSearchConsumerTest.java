@@ -22,7 +22,7 @@ import bumblebee.core.events.UpdateEvent;
 public class ElasticSearchConsumerTest {
 	private Map<String, Object> data = new LinkedHashMap<String, Object>();
 	private Map<String, Object> conditions = new LinkedHashMap<String, Object>();
-	private Client client = mock(Client.class);;
+	private Client client = mock(Client.class);
 	private ElasticSearchConsumer consumer = new ElasticSearchConsumer(client);;
 
 	@Before public void setup() {
@@ -53,13 +53,13 @@ public class ElasticSearchConsumerTest {
 		updateEvent.setCollection("collection");
 		updateEvent.setData(data);
 		
-		UpdateRequestBuilder request = mock(UpdateRequestBuilder.class);
-		doReturn(request).when(client).prepareUpdate(updateEvent.getNamespace(), updateEvent.getCollection(), data.get("id").toString());
+		IndexRequestBuilder request = mock(IndexRequestBuilder.class);
+		doReturn(request).when(client).prepareIndex(updateEvent.getNamespace(), updateEvent.getCollection(), data.get("id").toString());
 
 		consumer.consume(updateEvent);
 
-		verify(client).prepareUpdate(updateEvent.getNamespace(), updateEvent.getCollection(), data.get("id").toString());
-		verify(request).setDoc(data);
+		verify(client).prepareIndex(updateEvent.getNamespace(), updateEvent.getCollection(), data.get("id").toString());
+		verify(request).setSource(data);
 		verify(request).get();
 	}
 

@@ -51,7 +51,8 @@ public class ElasticSearchConsumer extends RESTConsumer {
 		try {
 			GetResponse response = elasticSearchClient.prepareGet("consumer_position", "log_position", "1").execute().actionGet();
 			return new LogPosition(response.getSource().get("logName").toString(), Long.parseLong(response.getSource().get("logPosition").toString()));
-		} catch (IndexMissingException | NullPointerException e) {
+		} catch (RuntimeException e) {
+			logger.severe(e.toString());
 			throw new BusinessException(e);
 		}
 	}
@@ -65,8 +66,8 @@ public class ElasticSearchConsumer extends RESTConsumer {
 
 	@Override protected void update(Event event) {
 		logger.warning("Update: ns: " + event.getNamespace() + ", collection: " + event.getCollection() + " valid: " + event.isUpdate() + " id: " + event.getData().get("id"));
-		UpdateRequestBuilder request = elasticSearchClient.prepareUpdate(event.getNamespace(), event.getCollection(), event.getData().get("id").toString());
-		request.setDoc(event.getData());
+		IndexRequestBuilder request = elasticSearchClient.prepareIndex(event.getNamespace(), event.getCollection(), event.getData().get("id").toString());
+		request.setSource(event.getData());
 		request.get();
 	}
 
