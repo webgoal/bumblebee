@@ -1,6 +1,6 @@
 package bumblebee.core.applier;
 
-import com.sun.istack.internal.logging.Logger;
+import java.util.logging.Logger;
 
 import bumblebee.core.events.Event;
 import bumblebee.core.exceptions.BusinessException;
@@ -13,7 +13,7 @@ public abstract class AbstractConsumer implements Consumer {
 			if (event.isUpdate()) update(event);
 			if (event.isDelete()) delete(event);
 		} catch(RuntimeException e) {
-			Logger.getLogger(getClass()).severe(e.toString());
+			Logger.getLogger(getClass().getName()).severe(e.toString());
 			throw new BusinessException(e);
 		}
 	}
