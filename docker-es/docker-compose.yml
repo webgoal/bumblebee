@@ -1,5 +1,5 @@
 es:
-  build: .
+  image: webgoal/elasticsearch-br
   ports:
     - "9200:9200"
     - "9300:9300"
