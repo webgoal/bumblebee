@@ -3,13 +3,13 @@ package bumblebee.core.reader;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import bumblebee.core.applier.MySQLPositionManager.LogPosition;
-import bumblebee.core.exceptions.BusinessException;
-import bumblebee.core.util.MySQLConnectionManager;
-
 import com.github.shyiko.mysql.binlog.BinaryLogClient;
 import com.github.shyiko.mysql.binlog.event.EventHeaderV4;
 import com.github.shyiko.mysql.binlog.event.EventType;
+
+import bumblebee.core.applier.MySQLPositionManager.LogPosition;
+import bumblebee.core.exceptions.BusinessException;
+import bumblebee.core.util.MySQLConnectionManager;
 
 public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 	private BinaryLogClient client;
@@ -32,12 +32,12 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 			@Override public void onEventDeserializationFailure(BinaryLogClient client, Exception ex) {
 				logger.severe("Falha na desserialização!");
 				logger.severe(ex.getMessage());
-				System.exit(1);
+				Runtime.getRuntime().halt(1);
 			}
 			@Override public void onCommunicationFailure(BinaryLogClient client, Exception ex) {
 				logger.severe("Falha na comunicação!");
 				logger.severe(ex.getMessage());
-				System.exit(1);
+				Runtime.getRuntime().halt(1);
 			}
 		});
 		client.registerEventListener(this);
@@ -58,7 +58,9 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 				producer.changePosition(event.getData());
 		} catch (BusinessException ex) {
 			ex.printStackTrace();
-			System.exit(1);
+			logger.severe(ex.getMessage());
+//			System.exit(1);
+			Runtime.getRuntime().halt(1);
 		}
 	}
 
