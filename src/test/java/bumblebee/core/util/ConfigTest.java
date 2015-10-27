@@ -17,6 +17,7 @@ public class ConfigTest {
 		assertEquals(3306, MySQLConnectionManager.getConsumerPort());
 		assertEquals("guest", MySQLConnectionManager.getConsumerUser());
         assertEquals("some", MySQLConnectionManager.getConsumerPass());
+        assertEquals(15000, MySQLConnectionManager.getConsumerTimeout());
 	}
 
 	@Test public void testLoadProducerConfig() {
@@ -27,6 +28,7 @@ public class ConfigTest {
 		assertEquals(3307, MySQLConnectionManager.getProducerPort());
 		assertEquals("root", MySQLConnectionManager.getProducerUser());
         assertEquals("pass", MySQLConnectionManager.getProducerPass());
+        assertEquals(15000, MySQLConnectionManager.getProducerTimeout());        
 	}
 
 }

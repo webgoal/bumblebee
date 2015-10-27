@@ -47,6 +47,10 @@ public class MySQLConnectionManager {
 		return producerConf.getString("database");
 	}
 	
+	public static int getProducerTimeout() {
+		return producerConf.getInt("timeout");
+	}
+	
 	public static String getConsumerHost() {
 		return consumerConf.getString("host");
 	}
@@ -67,10 +71,14 @@ public class MySQLConnectionManager {
 		return consumerConf.getString("database");
 	}
 	
+	public static int getConsumerTimeout() {
+		return consumerConf.getInt("timeout");
+	}
+	
 	public static Connection getProducerConnection() {
 		try {
 			if (producerConnection == null || producerConnection.isClosed())
-				producerConnection = getConnection(getProducerDatabase(), getProducerHost(), getProducerPort(), getProducerUser(), getProducerPass());
+				producerConnection = getConnection(getProducerDatabase(), getProducerHost(), getProducerPort(), getProducerUser(), getProducerPass(), getProducerTimeout());
 			return producerConnection;
 		} catch (SQLException e) {
 			throw new BusinessException(e);
@@ -80,16 +88,16 @@ public class MySQLConnectionManager {
 	public static Connection getConsumerConnection() {
 		try {
 			if (consumerConnection == null || consumerConnection.isClosed())
-				consumerConnection = getConnection(getConsumerDatabase(), getConsumerHost(), getConsumerPort(), getConsumerUser(), getConsumerPass());
+				consumerConnection = getConnection(getConsumerDatabase(), getConsumerHost(), getConsumerPort(), getConsumerUser(), getConsumerPass(), getConsumerTimeout());
 			return consumerConnection;
 		} catch (SQLException e) {
 			throw new BusinessException(e);
 		}
 	}
 
-	private static Connection getConnection(String database, String host, int port, String user, String pass) throws SQLException {
+	private static Connection getConnection(String database, String host, int port, String user, String pass, int timeout) throws SQLException {
 		DriverManager.setLoginTimeout(LOGIN_TIMEOUT);
-		Connection consumerConnection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port, user, pass);
+		Connection consumerConnection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "?connectTimeout=" + timeout + "&socketTimeout=" + timeout, user, pass);
 		consumerConnection.setCatalog(database);
 		consumerConnection.setAutoCommit(false);
 		return consumerConnection;
