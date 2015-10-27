@@ -32,12 +32,12 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 			@Override public void onEventDeserializationFailure(BinaryLogClient client, Exception ex) {
 				logger.severe("Falha na desserialização!");
 				logger.severe(ex.getMessage());
-				Runtime.getRuntime().halt(1);
+				throw new BusinessException(ex);
 			}
 			@Override public void onCommunicationFailure(BinaryLogClient client, Exception ex) {
 				logger.severe("Falha na comunicação!");
 				logger.severe(ex.getMessage());
-				Runtime.getRuntime().halt(1);
+				throw new BusinessException(ex);
 			}
 		});
 		client.registerEventListener(this);
@@ -59,13 +59,13 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 		} catch (BusinessException ex) {
 			ex.printStackTrace();
 			logger.severe(ex.getMessage());
-//			System.exit(1);
-			Runtime.getRuntime().halt(1);
+			throw new BusinessException(ex);
 		}
 	}
 
 	public void connect() {
 		try {
+			client.setKeepAlive(false);
 			client.connect();
 		} catch (IOException ex) {
 			throw new BusinessException(ex);
