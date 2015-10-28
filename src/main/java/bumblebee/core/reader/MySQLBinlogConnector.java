@@ -1,26 +1,26 @@
 package bumblebee.core.reader;
 
 import java.io.IOException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.io.InputStream;
+import java.net.Socket;
+import java.net.SocketException;
 import java.util.logging.Logger;
 
 import com.github.shyiko.mysql.binlog.BinaryLogClient;
 import com.github.shyiko.mysql.binlog.event.EventHeaderV4;
 import com.github.shyiko.mysql.binlog.event.EventType;
+import com.github.shyiko.mysql.binlog.io.BufferedSocketInputStream;
+import com.github.shyiko.mysql.binlog.network.SocketFactory;
 
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.util.MySQLConnectionManager;
-import bumblebee.core.util.TimeoutController;
-import bumblebee.core.util.TimeoutController.TimeoutException;
 
 public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 	private BinaryLogClient client;
 	private MySQLBinlogAdapter producer;
 	private Logger logger;
-	private Executor singleThreadE = Executors.newSingleThreadExecutor();
+	private final int timeoutSeconds = 30000;
 
 	public MySQLBinlogConnector(MySQLBinlogAdapter producer, LogPosition logPosition) {
 		logger = Logger.getLogger(getClass().getName());
@@ -38,13 +38,11 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 			@Override public void onEventDeserializationFailure(BinaryLogClient client, Exception ex) {
 				logger.severe("Falha na desserialização!");
 				logger.severe(ex.getMessage());
-				halt();
 				throw new BusinessException(ex);
 			}
 			@Override public void onCommunicationFailure(BinaryLogClient client, Exception ex) {
 				logger.severe("Falha na comunicação!");
 				logger.severe(ex.getMessage());
-				halt();
 				throw new BusinessException(ex);
 			}
 		});
@@ -52,41 +50,51 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 	}
 	
 	@Override public void onEvent(com.github.shyiko.mysql.binlog.event.Event event) {
-		singleThreadE.execute(new Runnable() { @Override public void run() {
-			int timeoutSeconds = 60;
-			try {
-				TimeoutController.execute(new Runnable() { @Override public void run() {
-					logger.info(event.toString());
-					if (event.getHeader().getEventType() == EventType.TABLE_MAP)
-						producer.mapTable(event.getData());
-					if (event.getHeader().getEventType() == EventType.EXT_WRITE_ROWS)
-						producer.transformInsert(event.getData(), (EventHeaderV4) event.getHeader());
-					if (event.getHeader().getEventType() == EventType.EXT_UPDATE_ROWS)
-						producer.transformUpdate(event.getData(), (EventHeaderV4) event.getHeader());
-					if (event.getHeader().getEventType() == EventType.EXT_DELETE_ROWS)
-						producer.transformDelete(event.getData(), (EventHeaderV4) event.getHeader());
-					if (event.getHeader().getEventType() == EventType.ROTATE)
-						producer.changePosition(event.getData());
-				}}, TimeUnit.SECONDS.toMillis(timeoutSeconds));
-			} catch (BusinessException | TimeoutException ex) {
-				ex.printStackTrace();
-				logger.severe(ex.getMessage());
-				halt();
-				throw new BusinessException(ex);
-			}
-		}});
+		try {
+			logger.info(event.toString());
+			if (event.getHeader().getEventType() == EventType.TABLE_MAP)
+				producer.mapTable(event.getData());
+			if (event.getHeader().getEventType() == EventType.EXT_WRITE_ROWS)
+				producer.transformInsert(event.getData(), (EventHeaderV4) event.getHeader());
+			if (event.getHeader().getEventType() == EventType.EXT_UPDATE_ROWS)
+				producer.transformUpdate(event.getData(), (EventHeaderV4) event.getHeader());
+			if (event.getHeader().getEventType() == EventType.EXT_DELETE_ROWS)
+				producer.transformDelete(event.getData(), (EventHeaderV4) event.getHeader());
+			if (event.getHeader().getEventType() == EventType.ROTATE)
+				producer.changePosition(event.getData());
+		} catch (BusinessException ex) {
+			ex.printStackTrace();
+			logger.severe(ex.getMessage());
+			disconnect();
+			throw new BusinessException(ex);
+		}
+	}
+
+	private void disconnect() {
+		try {
+			client.disconnect();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void connect() {
 		try {
 			client.setKeepAlive(false);
+			client.setSocketFactory(new SocketFactory() { @Override public Socket createSocket() throws SocketException {
+				Socket mySocket = new Socket() {
+	                private InputStream inputStream;
+	                @Override public synchronized InputStream getInputStream() throws IOException {
+	                    return inputStream != null ? inputStream : (inputStream = new BufferedSocketInputStream(super.getInputStream()));
+	                }
+	            };
+	            mySocket.setSoTimeout(timeoutSeconds);
+				return mySocket;
+			}});
 			client.connect();
 		} catch (IOException ex) {
 			throw new BusinessException(ex);
 		}
 	}
 	
-	public void halt() {
-		System.exit(1);
-	}
 }
