@@ -3,6 +3,7 @@ package bumblebee.core.reader;
 import java.io.IOException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.github.shyiko.mysql.binlog.BinaryLogClient;
@@ -12,6 +13,8 @@ import com.github.shyiko.mysql.binlog.event.EventType;
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.util.MySQLConnectionManager;
+import bumblebee.core.util.TimeoutController;
+import bumblebee.core.util.TimeoutController.TimeoutException;
 
 public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 	private BinaryLogClient client;
@@ -50,19 +53,22 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 	
 	@Override public void onEvent(com.github.shyiko.mysql.binlog.event.Event event) {
 		singleThreadE.execute(new Runnable() { @Override public void run() {
+			int timeoutSeconds = 60;
 			try {
-				logger.info(event.toString());
-				if (event.getHeader().getEventType() == EventType.TABLE_MAP)
-					producer.mapTable(event.getData());
-				if (event.getHeader().getEventType() == EventType.EXT_WRITE_ROWS)
-					producer.transformInsert(event.getData(), (EventHeaderV4) event.getHeader());
-				if (event.getHeader().getEventType() == EventType.EXT_UPDATE_ROWS)
-					producer.transformUpdate(event.getData(), (EventHeaderV4) event.getHeader());
-				if (event.getHeader().getEventType() == EventType.EXT_DELETE_ROWS)
-					producer.transformDelete(event.getData(), (EventHeaderV4) event.getHeader());
-				if (event.getHeader().getEventType() == EventType.ROTATE)
-					producer.changePosition(event.getData());
-			} catch (BusinessException ex) {
+				TimeoutController.execute(new Runnable() { @Override public void run() {
+					logger.info(event.toString());
+					if (event.getHeader().getEventType() == EventType.TABLE_MAP)
+						producer.mapTable(event.getData());
+					if (event.getHeader().getEventType() == EventType.EXT_WRITE_ROWS)
+						producer.transformInsert(event.getData(), (EventHeaderV4) event.getHeader());
+					if (event.getHeader().getEventType() == EventType.EXT_UPDATE_ROWS)
+						producer.transformUpdate(event.getData(), (EventHeaderV4) event.getHeader());
+					if (event.getHeader().getEventType() == EventType.EXT_DELETE_ROWS)
+						producer.transformDelete(event.getData(), (EventHeaderV4) event.getHeader());
+					if (event.getHeader().getEventType() == EventType.ROTATE)
+						producer.changePosition(event.getData());
+				}}, TimeUnit.SECONDS.toMillis(timeoutSeconds));
+			} catch (BusinessException | TimeoutException ex) {
 				ex.printStackTrace();
 				logger.severe(ex.getMessage());
 				halt();
