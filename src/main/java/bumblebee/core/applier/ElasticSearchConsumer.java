@@ -71,9 +71,9 @@ public class ElasticSearchConsumer extends RESTConsumer {
 	}
 
 	@Override protected void delete(Event event) {
-		logger.warning("Delete: ns = " + event.getNamespace() + ", collection: " + event.getCollection() + " valid: " + event.isDelete() + " id: " + event.getData().get("id"));
-		DeleteRequestBuilder request = elasticSearchClient.prepareDelete(event.getNamespace(), event.getCollection(), event.getData().get("id").toString());
-		request.setId(event.getData().get("id").toString());
+		logger.warning("Delete: ns = " + event.getNamespace() + ", collection: " + event.getCollection() + " valid: " + event.isDelete() + " id: " + event.getConditions().get("id"));
+		DeleteRequestBuilder request = elasticSearchClient.prepareDelete(event.getNamespace(), event.getCollection(), event.getConditions().get("id").toString());
+		request.setId(event.getConditions().get("id").toString());
 		request.get();
 	}
 

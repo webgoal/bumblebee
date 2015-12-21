@@ -67,7 +67,7 @@ public class ElasticSearchConsumerTest {
 		DeleteEvent deleteEvent = new DeleteEvent();
 		deleteEvent.setNamespace("namespace");
 		deleteEvent.setCollection("collection");
-		deleteEvent.setData(data);
+		deleteEvent.setConditions(data);
 		
 		DeleteRequestBuilder request = mock(DeleteRequestBuilder.class);
 		doReturn(request).when(client).prepareDelete(deleteEvent.getNamespace(), deleteEvent.getCollection(), data.get("id").toString());
