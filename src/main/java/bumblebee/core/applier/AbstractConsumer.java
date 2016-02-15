@@ -10,17 +10,17 @@ public abstract class AbstractConsumer implements Consumer {
 	@Override public void consume(Event event) {
 		try {
 			if (event.isInsert()) insert(event);
-			if (event.isUpdate()) update(event);
-			if (event.isDelete()) delete(event);
+			else if (event.isUpdate()) update(event);
+			else if (event.isDelete()) delete(event);
 		} catch(RuntimeException e) {
 			Logger.getLogger(getClass().getName()).severe(e.toString());
 			throw new BusinessException(e);
 		}
 	}
-	
+
 	abstract protected void insert(Event event);
-	
+
 	abstract protected void update(Event event);
-	
+
 	abstract protected void delete(Event event);
 }
