@@ -1,26 +1,20 @@
 package bumblebee.core.reader;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.Socket;
-import java.net.SocketException;
 import java.util.logging.Logger;
-
-import com.github.shyiko.mysql.binlog.BinaryLogClient;
-import com.github.shyiko.mysql.binlog.event.EventHeaderV4;
-import com.github.shyiko.mysql.binlog.event.EventType;
-import com.github.shyiko.mysql.binlog.io.BufferedSocketInputStream;
-import com.github.shyiko.mysql.binlog.network.SocketFactory;
 
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.util.MySQLConnectionManager;
 
+import com.github.shyiko.mysql.binlog.BinaryLogClient;
+import com.github.shyiko.mysql.binlog.event.EventHeaderV4;
+import com.github.shyiko.mysql.binlog.event.EventType;
+
 public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 	private BinaryLogClient client;
 	private MySQLBinlogAdapter producer;
 	private Logger logger;
-	private final int timeoutSeconds = 30000;
 
 	public MySQLBinlogConnector(MySQLBinlogAdapter producer, LogPosition logPosition) {
 		logger = Logger.getLogger(getClass().getName());
@@ -81,16 +75,6 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 	public void connect() {
 		try {
 			client.setKeepAlive(false);
-			client.setSocketFactory(new SocketFactory() { @Override public Socket createSocket() throws SocketException {
-				Socket mySocket = new Socket() {
-	                private InputStream inputStream;
-	                @Override public synchronized InputStream getInputStream() throws IOException {
-	                    return inputStream != null ? inputStream : (inputStream = new BufferedSocketInputStream(super.getInputStream()));
-	                }
-	            };
-	            mySocket.setSoTimeout(timeoutSeconds);
-				return mySocket;
-			}});
 			client.connect();
 		} catch (IOException ex) {
 			throw new BusinessException(ex);
