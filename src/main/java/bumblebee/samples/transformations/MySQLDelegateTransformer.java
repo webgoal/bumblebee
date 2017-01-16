@@ -10,7 +10,7 @@ public class MySQLDelegateTransformer extends AbstractTransformer {
 		super(consumer);
 	}
 
-	@Override public void consume(Event event) {
-		consumer.consume(event);
+	@Override public boolean consume(Event event) {
+		return consumer.consume(event);
 	}
 }

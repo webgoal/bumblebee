@@ -12,8 +12,9 @@ public class DummyConsumer implements Consumer {
 		return lastEvent;
 	}
 
-	@Override public void consume(Event event) {
+	@Override public boolean consume(Event event) {
 		lastEvent = event;
+		return true;
 	}
 
 	@Override public void setPosition(String logName, long logPosition) {

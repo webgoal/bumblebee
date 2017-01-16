@@ -4,7 +4,7 @@ import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.events.Event;
 
 public interface Consumer {
-	void consume(Event event);
+	boolean consume(Event event);
 	void setPosition(String logName, long logPosition);
 	void setPosition(long logPosition);
 	LogPosition getCurrentLogPosition();

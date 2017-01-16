@@ -28,6 +28,8 @@ public class MySQLBinlogAdapter implements Producer {
 	private Map<Long, String> dbInfo = new HashMap<Long, String>();
 	private SchemaManager schemaManager;
 	
+	private long sinceLastCommit = 0;
+	
 	public MySQLBinlogAdapter(Consumer consumer, SchemaManager schemaManager) {
 		this.consumer = consumer;
 		this.schemaManager = schemaManager;
@@ -44,16 +46,18 @@ public class MySQLBinlogAdapter implements Producer {
 
 	public void transformInsert(WriteRowsEventData data, EventHeaderV4 eventHeaderV4) {
 		try {
+			boolean force = false;
 			for (Serializable[] row : data.getRows()) {
 				Event event = new InsertEvent();
 				event.setNamespace(dbInfo.get(data.getTableId()));
 				event.setCollection(tableInfo.get(data.getTableId()));			
 				event.setData(dataToMap(dbInfo.get(data.getTableId()), tableInfo.get(data.getTableId()), row));
 	
-				consumer.consume(event);
+				force = consumer.consume(event);
 			}
-			consumer.setPosition(eventHeaderV4.getNextPosition());
-			consumer.commit();
+			updateAndCommitIfNeeded(eventHeaderV4.getNextPosition(), force);
+//			consumer.setPosition(eventHeaderV4.getNextPosition());
+//			consumer.commit();
 		} catch(BusinessException e) {
 			consumer.rollback();
 			throw e;
@@ -62,6 +66,7 @@ public class MySQLBinlogAdapter implements Producer {
 
 	public void transformUpdate(UpdateRowsEventData data, EventHeaderV4 eventHeaderV4) {
 		try {
+			boolean force = false;
 			for (Entry<Serializable[], Serializable[]> row : data.getRows()) {
 				Event event = new UpdateEvent();
 				event.setNamespace(dbInfo.get(data.getTableId()));
@@ -69,10 +74,11 @@ public class MySQLBinlogAdapter implements Producer {
 				event.setConditions(dataToMap(dbInfo.get(data.getTableId()), tableInfo.get(data.getTableId()), row.getKey()));
 				event.setData(dataToMap(dbInfo.get(data.getTableId()), tableInfo.get(data.getTableId()), row.getValue()));
 	
-				consumer.consume(event);
+				force = consumer.consume(event);
 			}
-			consumer.setPosition(eventHeaderV4.getNextPosition());
-			consumer.commit();
+			updateAndCommitIfNeeded(eventHeaderV4.getNextPosition(), force);
+//			consumer.setPosition(eventHeaderV4.getNextPosition());
+//			consumer.commit();
 		} catch(BusinessException e) {
 			consumer.rollback();
 			throw e;
@@ -81,20 +87,30 @@ public class MySQLBinlogAdapter implements Producer {
 	
 	public void transformDelete(DeleteRowsEventData data, EventHeaderV4 eventHeaderV4) {
 		try {
+			boolean force = false;
 			for (Serializable[] row : data.getRows()) {
 				Event event = new DeleteEvent();
 				event.setNamespace(dbInfo.get(data.getTableId()));
 				event.setCollection(tableInfo.get(data.getTableId()));
 				event.setConditions(dataToMap(dbInfo.get(data.getTableId()), tableInfo.get(data.getTableId()), row));
-	
-				consumer.consume(event);
+				force = consumer.consume(event);
 			}
-			consumer.setPosition(eventHeaderV4.getNextPosition());
-			consumer.commit();
+			updateAndCommitIfNeeded(eventHeaderV4.getNextPosition(), force);
+//			consumer.setPosition(eventHeaderV4.getNextPosition());
+//			consumer.commit();
 		} catch(BusinessException e) {
 			consumer.rollback();
 			throw e;
 		}
+	}
+	
+	private void updateAndCommitIfNeeded(long nextPosition, boolean force) {
+		if (sinceLastCommit++ > 1000 || force) {
+			consumer.setPosition(nextPosition);
+			consumer.commit();
+			sinceLastCommit = 0;
+		}
+		
 	}
 
 	private Map<String, Object> dataToMap(String dbName, String tableName, Serializable[] row) {

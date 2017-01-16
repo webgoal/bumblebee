@@ -7,11 +7,12 @@ import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.interfaces.Consumer;
 
 public abstract class AbstractConsumer implements Consumer {
-	@Override public void consume(Event event) {
+	@Override public boolean consume(Event event) {
 		try {
 			if (event.isInsert()) insert(event);
 			else if (event.isUpdate()) update(event);
 			else if (event.isDelete()) delete(event);
+			return event.isInsert() || event.isUpdate() || event.isDelete();
 		} catch(RuntimeException e) {
 			Logger.getLogger(getClass().getName()).severe(e.toString());
 			throw new BusinessException(e);

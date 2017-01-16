@@ -60,4 +60,5 @@ public abstract class Event {
 	public boolean isDelete() {
 		return false;
 	}
+
 }
