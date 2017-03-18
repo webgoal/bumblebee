@@ -1,6 +1,8 @@
 package bumblebee.samples.elastic_application;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -8,22 +10,28 @@ import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 public class Main {
 
 	private static TransportClient transportClient;
 
+	@SuppressWarnings("resource")
 	public static void main(String[] args) throws IOException {
 		//Create Client
-		Settings settings = ImmutableSettings.settingsBuilder().put("cluster.name", "elasticsearch").build();
-		transportClient = new TransportClient(settings);
-		transportClient = transportClient.addTransportAddress(new InetSocketTransportAddress("localhost", 9300));
-		Client client = (Client) transportClient;
+		Client client = null;
+		try {
+			Settings settings = Settings.builder().put("cluster.name", "elasticsearch").build();
+			InetSocketTransportAddress transportAddress = new InetSocketTransportAddress(InetAddress.getByName("192.168.99.100"), 9200);
+			TransportClient transportClient = new PreBuiltTransportClient(settings).addTransportAddress(transportAddress);
+			client = (Client) transportClient;
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
 
 		//Create Index and set settings and mappings
 		

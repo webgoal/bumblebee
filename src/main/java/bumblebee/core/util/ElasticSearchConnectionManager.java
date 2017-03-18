@@ -1,10 +1,13 @@
 package bumblebee.core.util;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -32,11 +35,20 @@ public class ElasticSearchConnectionManager {
 		return consumerConf.getString("cluster");
 	}
 
+	@SuppressWarnings("resource")
 	public static Client getConsumerClient() {
-		Settings settings = ImmutableSettings.settingsBuilder().put("cluster.name", getConsumerCluster()).build();
-		@SuppressWarnings("resource")
-		TransportClient transportClient = new TransportClient(settings);
-		transportClient = transportClient.addTransportAddress(new InetSocketTransportAddress(getConsumerHost(), getConsumerPort()));
-		return (Client) transportClient;
+		
+		try {
+			System.out.println("Host: " + getConsumerCluster());
+			Settings settings = Settings.builder().put("cluster.name", getConsumerCluster()).build();
+			System.out.println("Host: " + getConsumerHost());
+			System.out.println("Host: " + getConsumerPort());
+			InetSocketTransportAddress transportAddress = new InetSocketTransportAddress(InetAddress.getByName(getConsumerHost()), getConsumerPort());
+			TransportClient transportClient = new PreBuiltTransportClient(settings).addTransportAddress(transportAddress);
+			return (Client) transportClient;
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
