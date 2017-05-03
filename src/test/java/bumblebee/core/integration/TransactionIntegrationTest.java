@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
 import java.util.LinkedList;
@@ -23,8 +24,9 @@ import com.github.shyiko.mysql.binlog.event.WriteRowsEventData;
 
 public class TransactionIntegrationTest {
 
-	@Test public void shouldCommitAfterConsumeEvent() {
+	@Test public void shouldCommitAfterConsumeEventIfForced() {
 		Consumer consumer = mock(Consumer.class);
+		when(consumer.consume(any())).thenReturn(true);
 		
 		MySQLBinlogAdapter producer = new MySQLBinlogAdapter(consumer, mock(SchemaManager.class));
 
@@ -36,7 +38,9 @@ public class TransactionIntegrationTest {
 		EventHeaderV4 eventHeader = mock(EventHeaderV4.class);
 
 		producer.transformInsert(wred, eventHeader);
+		
 		verify(consumer).consume(any());
+		
 		verify(consumer).commit();
 		verify(consumer, never()).rollback();
 	}

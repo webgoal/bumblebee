@@ -27,9 +27,9 @@ public class MySQLBinlogAdapter implements Producer {
 	private Map<Long, String> tableInfo = new HashMap<Long, String>();
 	private Map<Long, String> dbInfo = new HashMap<Long, String>();
 	private SchemaManager schemaManager;
-	
+
 	private long sinceLastCommit = 0;
-	
+
 	public MySQLBinlogAdapter(Consumer consumer, SchemaManager schemaManager) {
 		this.consumer = consumer;
 		this.schemaManager = schemaManager;
@@ -50,9 +50,9 @@ public class MySQLBinlogAdapter implements Producer {
 			for (Serializable[] row : data.getRows()) {
 				Event event = new InsertEvent();
 				event.setNamespace(dbInfo.get(data.getTableId()));
-				event.setCollection(tableInfo.get(data.getTableId()));			
+				event.setCollection(tableInfo.get(data.getTableId()));
 				event.setData(dataToMap(dbInfo.get(data.getTableId()), tableInfo.get(data.getTableId()), row));
-	
+
 				force = consumer.consume(event);
 			}
 			updateAndCommitIfNeeded(eventHeaderV4.getNextPosition(), force);
@@ -73,7 +73,7 @@ public class MySQLBinlogAdapter implements Producer {
 				event.setCollection(tableInfo.get(data.getTableId()));
 				event.setConditions(dataToMap(dbInfo.get(data.getTableId()), tableInfo.get(data.getTableId()), row.getKey()));
 				event.setData(dataToMap(dbInfo.get(data.getTableId()), tableInfo.get(data.getTableId()), row.getValue()));
-	
+
 				force = consumer.consume(event);
 			}
 			updateAndCommitIfNeeded(eventHeaderV4.getNextPosition(), force);
@@ -84,7 +84,7 @@ public class MySQLBinlogAdapter implements Producer {
 			throw e;
 		}
 	}
-	
+
 	public void transformDelete(DeleteRowsEventData data, EventHeaderV4 eventHeaderV4) {
 		try {
 			boolean force = false;
@@ -103,14 +103,14 @@ public class MySQLBinlogAdapter implements Producer {
 			throw e;
 		}
 	}
-	
+
 	private void updateAndCommitIfNeeded(long nextPosition, boolean force) {
 		if (sinceLastCommit++ > 1000 || force) {
 			consumer.setPosition(nextPosition);
 			consumer.commit();
 			sinceLastCommit = 0;
 		}
-		
+
 	}
 
 	private Map<String, Object> dataToMap(String dbName, String tableName, Serializable[] row) {
