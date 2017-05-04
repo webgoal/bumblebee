@@ -31,7 +31,6 @@ dependencies {
   compile 'org.elasticsearch.client:transport:5.2.2'
   compile 'org.apache.tika:tika-parsers:1.12'
 
-  testCompile 'com.carrotsearch.randomizedtesting:randomizedtesting-runner:2.1.14'
   testCompile 'junit:junit:4.+'
   testCompile 'com.h2database:h2:1.4.187'
   testCompile 'org.mockito:mockito-core:1.+'
