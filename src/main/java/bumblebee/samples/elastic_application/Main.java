@@ -18,8 +18,6 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 public class Main {
 
-	private static TransportClient transportClient;
-
 	@SuppressWarnings("resource")
 	public static void main(String[] args) throws IOException {
 		//Create Client

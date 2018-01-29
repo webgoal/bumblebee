@@ -15,8 +15,9 @@ import com.typesafe.config.ConfigFactory;
 public class ElasticSearchConnectionManager {
 	private static Config consumerConf;
 
-	public static void loadConfig() {
-		loadConfig(ConfigFactory.defaultApplication());
+	public static void loadConfig(String configPath) {
+		Config config = ConfigFactory.load(configPath);
+		loadConfig(config);
 	}
 
 	public static void loadConfig(Config config) {
