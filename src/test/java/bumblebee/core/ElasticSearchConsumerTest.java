@@ -23,7 +23,7 @@ public class ElasticSearchConsumerTest {
 	private Map<String, Object> data = new LinkedHashMap<String, Object>();
 	private Map<String, Object> conditions = new LinkedHashMap<String, Object>();
 	private Client client = mock(Client.class);
-	private ElasticSearchConsumer consumer = new ElasticSearchConsumer(client);;
+	private ElasticSearchConsumer consumer = new ElasticSearchConsumer();;
 
 	@Before public void setup() {
 		data.put("id", 1);
