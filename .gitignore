@@ -3,6 +3,7 @@
 build/
 bin/
 data/
+dist/
 
 gradle-app.setting
 
