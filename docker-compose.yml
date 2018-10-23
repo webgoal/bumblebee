@@ -1,0 +1,8 @@
+version: '2'
+services:
+  bumblebee:
+    build: .
+    volumes:
+      - .:/opt/src/bumblebee
+      - ~/.gradle/caches/:/root/.gradle/caches/
+    command: bumblebee

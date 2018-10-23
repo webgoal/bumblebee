@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.net.MalformedURLException;
 import java.io.*;
 
@@ -51,8 +52,8 @@ public class ElasticSearchConsumer extends RESTConsumer {
 //		UpdateRequestBuilder request = elasticSearchClient.prepareUpdate("consumer_position", "log_position", "1");
 //		request.setDoc("{\"logPosition\": "+ logPosition +"}");
 //		request.get();
-
-		String data = "{\"logPosition\":\"" + logPosition + "\"}";
+		LogPosition logFilePosition = this.getCurrentLogPosition();
+		String data = "{\"logName\":\"" + logFilePosition.getFilename().replaceAll("\"", "'") + "\",\"logPosition\":\"" + logPosition + "\"}";
 
 		this.indexRequest("consumer_position", "log_position", "1", data);
 	}
@@ -127,14 +128,18 @@ public class ElasticSearchConsumer extends RESTConsumer {
 //		Config conf = ConfigFactory.load();
 
 		Map<String, String> stringContent = new HashMap<String, String>();
-		
+
 		for (Map.Entry<String, Object> entry : content.entrySet()) {
 		    String key = entry.getKey();
 		    Object value = entry.getValue();
 
+		    if (value == null) {
+		    	value = "";
+			}
+		    
 		    stringContent.put(key.toString(), value.toString());
 		}
-		
+
 		Gson gson = new Gson();
 		String data = gson.toJson(stringContent);
 
@@ -149,10 +154,12 @@ public class ElasticSearchConsumer extends RESTConsumer {
 			connection.setDoOutput(true);
 			connection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
 			connection.setRequestProperty("Accept", "application/json");
-			OutputStreamWriter osw = new OutputStreamWriter(connection.getOutputStream());
-			
+			OutputStreamWriter osw = new OutputStreamWriter(connection.getOutputStream(), StandardCharsets.UTF_8);
+
 			content = this.removeMarks(content);
-			
+
+			logger.warning("Indexando licitação: " + id + " com conteudo: " + content);
+
 			osw.write(content);
 			osw.flush();
 			osw.close();
@@ -181,8 +188,8 @@ public class ElasticSearchConsumer extends RESTConsumer {
 			osw.flush();
 			osw.close();
 
-			if (!(connection.getResponseCode() >= 200 && connection.getResponseCode() <= 299)) {
-				throw new RuntimeException("Request error at id " + id + ": " + connection.getResponseMessage());
+			if (!(connection.getResponseCode() >= 200 && connection.getResponseCode() <= 299) && connection.getResponseCode() != 404) {
+				throw new RuntimeException("Request error at id " + id + ": " + connection.getResponseCode() + connection.getResponseMessage());
 			}
 		} catch (MalformedURLException e) {
 			logger.severe(e.toString());
@@ -192,7 +199,7 @@ public class ElasticSearchConsumer extends RESTConsumer {
 			throw new BusinessException(e);
 		}
 	}
-	
+
 	public String removeMarks(String content){
 		String regex = "(/\\*([^*]|[\\r\\n]|(\\*([^/]|[\\r\\n])))*\\*/)|(\n)|(\r)|(\t)";
 		return content.replaceAll(regex, " ").replaceAll(" +", " ");

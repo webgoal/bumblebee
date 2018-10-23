@@ -2,9 +2,12 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-
+// Apply the java plugin to add support for Java
 apply plugin: 'java'
-apply plugin: 'eclipse'
+// apply plugin: 'eclipse'
+apply plugin: 'application'
+
+mainClassName = "bumblebee.samples.elastic_application.Main"
 
 sourceCompatibility = 1.8
 version = '1.0'
