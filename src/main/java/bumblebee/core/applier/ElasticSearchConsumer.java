@@ -147,12 +147,13 @@ public class ElasticSearchConsumer extends RESTConsumer {
 			osw.flush();
 			osw.close();
 
-			if (!(connection.getResponseCode() >= 200 && connection.getResponseCode() <= 299)) {
-				throw new RuntimeException("Request error at id " + id + ": " + connection.getResponseMessage());
-			}
-			
 			if (isUpdate && connection.getResponseCode() >= 404) {
 				this.indexRequest(index, type, id, content, false);
+				return;
+			}
+			
+			if (!(connection.getResponseCode() >= 200 && connection.getResponseCode() <= 299)) {
+				throw new RuntimeException("Request error at id " + id + ": " + connection.getResponseMessage());
 			}
 		} catch (MalformedURLException e) {
 			logger.severe(e.toString());
