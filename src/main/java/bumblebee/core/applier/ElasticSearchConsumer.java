@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.net.MalformedURLException;
 import java.io.*;
 
@@ -32,14 +33,13 @@ public class ElasticSearchConsumer extends RESTConsumer {
 	@Override public void setPosition(String logName, long logPosition) {
 		String data = "{\"logName\":\"" + logName.replaceAll("\"", "'") + "\",\"logPosition\":\"" + logPosition + "\"}";
 
-		this.indexRequest("consumer_position", "log_position", "1", data);
+		this.indexRequest("consumer_position", "log_position", "1", data, false);
 	}
 
 	@Override public void setPosition(long logPosition) {
-		LogPosition logFilePosition = this.getCurrentLogPosition();
-		String data = "{\"logName\":\"" + logFilePosition.getFilename().replaceAll("\"", "'") + "\",\"logPosition\":\"" + logPosition + "\"}";
+		String data = "{\"logPosition\":\"" + logPosition + "\"}";
 
-		this.indexRequest("consumer_position", "log_position", "1", data);
+		this.indexRequest("consumer_position", "log_position", "1", data, true);
 	}
 
 	@Override public LogPosition getCurrentLogPosition() {
@@ -81,12 +81,12 @@ public class ElasticSearchConsumer extends RESTConsumer {
 
 	@Override protected void insert(Event event) {
 		logger.warning("Insert: ns = " + event.getNamespace() + ", collection: " + event.getCollection() + " valid: " + event.isInsert() + " id: " + event.getData().get("id"));
-		this.indexItem(event.getNamespace(), event.getCollection(), event.getData().get("id").toString(), event.getData());
+		this.indexItem(event.getNamespace(), event.getCollection(), event.getData().get("id").toString(), event.getData(), false);
 	}
 
 	@Override protected void update(Event event) {
 		logger.warning("Update: ns: " + event.getNamespace() + ", collection: " + event.getCollection() + " valid: " + event.isUpdate() + " id: " + event.getData().get("id"));
-		this.indexItem(event.getNamespace(), event.getCollection(), event.getData().get("id").toString(), event.getData());
+		this.indexItem(event.getNamespace(), event.getCollection(), event.getData().get("id").toString(), event.getData(), true);
 	}
 
 	@Override protected void delete(Event event) {
@@ -94,31 +94,43 @@ public class ElasticSearchConsumer extends RESTConsumer {
 		this.deleteIndexedItem(event.getNamespace(), event.getCollection(), event.getConditions().get("id").toString());
 	}
 
-	private void indexItem(String index, String type, String id, Map<String, Object> content) {
+	private void indexItem(String index, String type, String id, Map<String, Object> content, Boolean isUpdate ) {
 		Map<String, String> stringContent = new HashMap<String, String>();
 
 		for (Map.Entry<String, Object> entry : content.entrySet()) {
 		    String key = entry.getKey();
 		    Object value = entry.getValue();
 
-		    if (value == null) {
-		    	value = "";
-			}
+		    if (value != null && !value.equals("")) {
+		    	if (value.getClass() == java.util.Date.class) {
+			    	value = new SimpleDateFormat("yyyy-MM-dd").format(value);
+			    }
 
-		    stringContent.put(key.toString(), value.toString());
+			    stringContent.put(key.toString(), value.toString());
+		    }
 		}
 
 		Gson gson = new Gson();
 		String data = gson.toJson(stringContent);
 
-		this.indexRequest(index, type, id, data);
+		this.indexRequest(index, type, id, data, isUpdate);
 	}
 
-	private void indexRequest(String index, String type, String id, String content) {
+	private void indexRequest(String index, String type, String id, String content, Boolean isUpdate) {
 		try{
-			URL url = new URL(host + "/" + index + "/" + type + "/" + id);
+			String method;
+			String urlString = host + "/" + index + "/" + type + "/" + id;
+			
+			if (isUpdate) {
+				method = "POST";
+				urlString += "/_update";
+			} else {
+				method = "PUT";
+			}
+			
+			URL url = new URL(urlString);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestMethod("PUT");
+			connection.setRequestMethod(method);
 			connection.setDoOutput(true);
 			connection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
 			connection.setRequestProperty("Accept", "application/json");
@@ -126,7 +138,7 @@ public class ElasticSearchConsumer extends RESTConsumer {
 
 			content = this.removeMarks(content);
 
-			logger.warning("Indexando licitação: " + id + " com conteudo: " + content);
+			System.out.println("Indexando " + type + ": " + id + " com conteudo: " + content);
 
 			osw.write(content);
 			osw.flush();
