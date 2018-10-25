@@ -124,6 +124,7 @@ public class ElasticSearchConsumer extends RESTConsumer {
 			if (isUpdate) {
 				method = "POST";
 				urlString += "/_update";
+				content = "{ \"doc\":" + content + "}";
 			} else {
 				method = "PUT";
 			}
