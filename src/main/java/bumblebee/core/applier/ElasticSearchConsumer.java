@@ -81,20 +81,20 @@ public class ElasticSearchConsumer extends RESTConsumer {
 
 	@Override protected void insert(Event event) {
 		logger.warning("Insert: ns = " + event.getNamespace() + ", collection: " + event.getCollection() + " valid: " + event.isInsert() + " id: " + event.getData().get("id"));
-		this.indexItem(event.getData().get("id").toString(), event.getData());
+		this.indexItem(event.getNamespace(), event.getCollection(), event.getData().get("id").toString(), event.getData());
 	}
 
 	@Override protected void update(Event event) {
 		logger.warning("Update: ns: " + event.getNamespace() + ", collection: " + event.getCollection() + " valid: " + event.isUpdate() + " id: " + event.getData().get("id"));
-		this.indexItem(event.getData().get("id").toString(), event.getData());
+		this.indexItem(event.getNamespace(), event.getCollection(), event.getData().get("id").toString(), event.getData());
 	}
 
 	@Override protected void delete(Event event) {
 		logger.warning("Delete: ns = " + event.getNamespace() + ", collection: " + event.getCollection() + " valid: " + event.isDelete() + " id: " + event.getConditions().get("id"));
-		this.deleteIndexedItem(event.getConditions().get("id").toString());
+		this.deleteIndexedItem(event.getNamespace(), event.getCollection(), event.getConditions().get("id").toString());
 	}
 
-	private void indexItem(String id, Map<String, Object> content) {
+	private void indexItem(String index, String type, String id, Map<String, Object> content) {
 		Map<String, String> stringContent = new HashMap<String, String>();
 
 		for (Map.Entry<String, Object> entry : content.entrySet()) {
@@ -111,7 +111,7 @@ public class ElasticSearchConsumer extends RESTConsumer {
 		Gson gson = new Gson();
 		String data = gson.toJson(stringContent);
 
-		this.indexRequest("controle", "licitacoes", id, data);
+		this.indexRequest(index, type, id, data);
 	}
 
 	private void indexRequest(String index, String type, String id, String content) {
@@ -144,9 +144,9 @@ public class ElasticSearchConsumer extends RESTConsumer {
 		}
 	}
 
-	private void deleteIndexedItem(String id) {
+	private void deleteIndexedItem(String index, String type, String id) {
 		try{
-			URL url = new URL(host + "/controle/licitacoes/" + id);
+			URL url = new URL(host + "/" + index + "/" + type + "/" + id);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("DELETE");
 			connection.setDoOutput(true);
