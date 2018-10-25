@@ -120,13 +120,15 @@ public class ElasticSearchConsumer extends RESTConsumer {
 		try{
 			String method;
 			String urlString = host + "/" + index + "/" + type + "/" + id;
+			String contentForRequest;
 			
 			if (isUpdate) {
 				method = "POST";
 				urlString += "/_update";
-				content = "{ \"doc\":" + content + "}";
+				contentForRequest = "{ \"doc\":" + content + "}";
 			} else {
 				method = "PUT";
+				contentForRequest = content;
 			}
 			
 			URL url = new URL(urlString);
@@ -137,16 +139,20 @@ public class ElasticSearchConsumer extends RESTConsumer {
 			connection.setRequestProperty("Accept", "application/json");
 			OutputStreamWriter osw = new OutputStreamWriter(connection.getOutputStream(), StandardCharsets.UTF_8);
 
-			content = this.removeMarks(content);
+			contentForRequest = this.removeMarks(contentForRequest);
 
-			System.out.println("Indexando " + type + ": " + id + " com conteudo: " + content);
+			System.out.println("Indexando " + type + ": " + id + " com conteudo: " + contentForRequest);
 
-			osw.write(content);
+			osw.write(contentForRequest);
 			osw.flush();
 			osw.close();
 
 			if (!(connection.getResponseCode() >= 200 && connection.getResponseCode() <= 299)) {
 				throw new RuntimeException("Request error at id " + id + ": " + connection.getResponseMessage());
+			}
+			
+			if (isUpdate && connection.getResponseCode() >= 404) {
+				this.indexRequest(index, type, id, content, false);
 			}
 		} catch (MalformedURLException e) {
 			logger.severe(e.toString());
