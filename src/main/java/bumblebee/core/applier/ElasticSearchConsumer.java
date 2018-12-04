@@ -103,7 +103,7 @@ public class ElasticSearchConsumer extends RESTConsumer {
 
 		    if (value != null && !value.equals("")) {
 		    	if (value.getClass() == java.util.Date.class) {
-			    	value = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(value);
+			    	value = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(value);
 			    }
 
 			    stringContent.put(key.toString(), value.toString());
