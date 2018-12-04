@@ -103,7 +103,7 @@ public class ElasticSearchConsumer extends RESTConsumer {
 
 		    if (value != null && !value.equals("")) {
 		    	if (value.getClass() == java.util.Date.class) {
-			    	value = new SimpleDateFormat("yyyy-MM-dd").format(value);
+			    	value = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(value);
 			    }
 
 			    stringContent.put(key.toString(), value.toString());
@@ -121,7 +121,7 @@ public class ElasticSearchConsumer extends RESTConsumer {
 			String method;
 			String urlString = host + "/" + index + "/" + type + "/" + id;
 			String contentForRequest;
-			
+
 			if (isUpdate) {
 				method = "POST";
 				urlString += "/_update";
@@ -130,7 +130,7 @@ public class ElasticSearchConsumer extends RESTConsumer {
 				method = "PUT";
 				contentForRequest = content;
 			}
-			
+
 			URL url = new URL(urlString);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod(method);
@@ -151,7 +151,7 @@ public class ElasticSearchConsumer extends RESTConsumer {
 				this.indexRequest(index, type, id, content, false);
 				return;
 			}
-			
+
 			if (!(connection.getResponseCode() >= 200 && connection.getResponseCode() <= 299)) {
 				throw new RuntimeException("Request error at id " + id + ": " + connection.getResponseMessage());
 			}
