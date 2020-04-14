@@ -19,18 +19,18 @@ public class Main {
 		try {
 			Config config = ConfigFactory.load("bumblebee/samples/simple_application/application.conf");
 			MySQLConnectionManager.loadConfig(config);
-			
+
 			MySQLPositionManager positionManager = new MySQLPositionManager("db", "log_position");
 			positionManager.setConnection(MySQLConnectionManager.getConsumerConnection());
-			
+
 			Consumer consumer = new MySQLConsumer(MySQLConnectionManager.getConsumerConnection(), positionManager);
-			
+
 			Transformer tr = new MySQLDelegateTransformer(consumer);
-			
+
 			MySQLSchemaManager schemaManager = new MySQLSchemaManager(MySQLConnectionManager.getProducerConnection());
 			MySQLBinlogAdapter producer = new MySQLBinlogAdapter(tr, schemaManager);
-			
-			MySQLBinlogConnector connector = new MySQLBinlogConnector(producer, positionManager.getCurrentLogPosition());
+
+			MySQLBinlogConnector connector = new MySQLBinlogConnector(producer, positionManager.getCurrentLogPosition(), 0L);
 			connector.connect();
 		} catch (BusinessException ex) {
 			ex.printStackTrace();

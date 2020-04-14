@@ -16,10 +16,11 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 	private MySQLBinlogAdapter producer;
 	private Logger logger;
 
-	public MySQLBinlogConnector(MySQLBinlogAdapter producer, LogPosition logPosition) {
+	public MySQLBinlogConnector(MySQLBinlogAdapter producer, LogPosition logPosition, long serverId) {
 		logger = Logger.getLogger(getClass().getName());
 		this.producer = producer;
 		client = new BinaryLogClient(MySQLConnectionManager.getProducerHost(), MySQLConnectionManager.getProducerPort(), null, MySQLConnectionManager.getProducerUser(), MySQLConnectionManager.getProducerPass());
+		client.setServerId(serverId);
 		client.setBinlogFilename(logPosition.getFilename());
 		client.setBinlogPosition(logPosition.getPosition());
 		client.registerLifecycleListener(new BinaryLogClient.LifecycleListener() {
@@ -42,7 +43,7 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 		});
 		client.registerEventListener(this);
 	}
-	
+
 	@Override public void onEvent(com.github.shyiko.mysql.binlog.event.Event event) {
 		try {
 			logger.info(event.toString());
@@ -80,5 +81,5 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 			throw new BusinessException(ex);
 		}
 	}
-	
+
 }
