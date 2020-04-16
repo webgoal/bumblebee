@@ -1,5 +1,5 @@
 FROM java:8
-RUN echo "America/Sao_Paulo" > /etc/timezone \
+RUN echo "America/New_York" > /etc/timezone \
 && dpkg-reconfigure -f noninteractive tzdata
 RUN apt-get update && apt-get install -y --no-install-recommends cron nano
 
