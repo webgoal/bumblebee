@@ -187,7 +187,7 @@ public class ElasticSearchConsumer extends RESTConsumer {
 	}
 
 	public String removeMarks(String content){
-		String regex = "(/\\*([^*]|[\\r\\n]|(\\*([^/]|[\\r\\n])))*\\*/)|(\n)|(\r)|(\t)";
+		String regex = "(\\n)|(\\r)|(\\t)";
 		return content.replaceAll(regex, " ").replaceAll(" +", " ");
 
 	}
