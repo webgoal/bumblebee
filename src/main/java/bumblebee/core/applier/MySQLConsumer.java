@@ -14,21 +14,21 @@ import bumblebee.core.exceptions.BusinessException;
 
 
 public class MySQLConsumer extends AbstractConsumer {
-	
+
 	private Connection connection;
 	private MySQLPositionManager positionManager;
 	private Logger logger;
-	
+
 	public MySQLConsumer(Connection connection, MySQLPositionManager positionManager) {
 		logger = Logger.getLogger(getClass().getName());
 		this.connection = connection;
 		this.positionManager = positionManager;
 	}
-	
+
 	protected void insert(Event event) {
 		executeSql(prepareInsertSQL(event), event.getData().values(), Collections.emptyList());
 	}
-	
+
 	protected void update(Event event) {
 		executeSql(prepareUpdateSQL(event), event.getData().values(), event.getConditions().values());
 	}
@@ -36,19 +36,19 @@ public class MySQLConsumer extends AbstractConsumer {
 	protected void delete(Event event) {
 		executeSql(prepareDeleteSQL(event), Collections.emptyList(), event.getConditions().values());
 	}
-	
+
 	@Override public void setPosition(String logName, long logPosition) {
 		positionManager.update(logName, logPosition);
 	}
-	
+
 	@Override public void setPosition(long logPosition) {
 		positionManager.update(getCurrentLogPosition().getFilename(), logPosition);
 	}
-	
+
 	@Override public LogPosition getCurrentLogPosition() {
 		return positionManager.getCurrentLogPosition();
 	}
-	
+
 	@Override public void commit() {
 		try {
 			connection.commit();
@@ -56,7 +56,7 @@ public class MySQLConsumer extends AbstractConsumer {
 			throw new BusinessException(ex);
 		}
 	}
-	
+
 	@Override public void rollback() {
 		try {
 			connection.rollback();
@@ -72,7 +72,7 @@ public class MySQLConsumer extends AbstractConsumer {
 			int counter = 1;
 			for (Object v : data)       stmt.setObject(counter++, fixType(v));
 			for (Object v : conditions) stmt.setObject(counter++, fixType(v));
-			logger.warning(stmt.toString());
+			logger.info(stmt.toString());
 			stmt.executeUpdate();
 			stmt.close();
 		} catch (SQLException e) {
@@ -108,7 +108,7 @@ public class MySQLConsumer extends AbstractConsumer {
 	private String conditions(Event event) {
 		return serializeMap(event.getConditions(), " AND ");
 	}
-	
+
 	private String serializeMap(Map<String, Object> data, String glue) {
 		StringBuffer sb = new StringBuffer();
 		data.forEach((k, v) -> sb.append(k + " = ?" + glue));

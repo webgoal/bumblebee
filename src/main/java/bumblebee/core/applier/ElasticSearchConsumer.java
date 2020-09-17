@@ -80,12 +80,12 @@ public class ElasticSearchConsumer extends RESTConsumer {
 	}
 
 	@Override protected void insert(Event event) {
-		logger.warning("Insert: ns = " + event.getNamespace() + ", collection: " + event.getCollection() + " valid: " + event.isInsert() + " id: " + event.getData().get("id"));
+		logger.info("Insert: ns = " + event.getNamespace() + ", collection: " + event.getCollection() + " valid: " + event.isInsert() + " id: " + event.getData().get("id"));
 		this.indexItem(event.getNamespace(), event.getCollection(), event.getData().get("id").toString(), event.getData(), false);
 	}
 
 	@Override protected void update(Event event) {
-		logger.warning("Update: ns: " + event.getNamespace() + ", collection: " + event.getCollection() + " valid: " + event.isUpdate() + " id: " + event.getData().get("id"));
+		logger.info("Update: ns: " + event.getNamespace() + ", collection: " + event.getCollection() + " valid: " + event.isUpdate() + " id: " + event.getData().get("id"));
 		this.indexItem(event.getNamespace(), event.getCollection(), event.getData().get("id").toString(), event.getData(), true);
 	}
 
