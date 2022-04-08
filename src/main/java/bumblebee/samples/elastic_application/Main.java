@@ -11,7 +11,7 @@ import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
@@ -24,7 +24,7 @@ public class Main {
 		Client client = null;
 		try {
 			Settings settings = Settings.builder().put("cluster.name", "elasticsearch").build();
-			InetSocketTransportAddress transportAddress = new InetSocketTransportAddress(InetAddress.getByName("192.168.99.100"), 9200);
+			TransportAddress transportAddress = new TransportAddress(InetAddress.getByName("192.168.99.100"), 9200);
 			TransportClient transportClient = new PreBuiltTransportClient(settings).addTransportAddress(transportAddress);
 			client = (Client) transportClient;
 		} catch (UnknownHostException e) {

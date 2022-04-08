@@ -6,7 +6,7 @@ import java.net.UnknownHostException;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 import com.typesafe.config.Config;
@@ -44,7 +44,7 @@ public class ElasticSearchConnectionManager {
 			Settings settings = Settings.builder().put("cluster.name", getConsumerCluster()).build();
 			System.out.println("Host: " + getConsumerHost());
 			System.out.println("Host: " + getConsumerPort());
-			InetSocketTransportAddress transportAddress = new InetSocketTransportAddress(InetAddress.getByName(getConsumerHost()), getConsumerPort());
+			TransportAddress transportAddress = new TransportAddress(InetAddress.getByName(getConsumerHost()), getConsumerPort());
 			TransportClient transportClient = new PreBuiltTransportClient(settings).addTransportAddress(transportAddress);
 			return (Client) transportClient;
 		} catch (UnknownHostException e) {
