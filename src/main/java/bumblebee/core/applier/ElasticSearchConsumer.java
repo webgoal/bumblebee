@@ -33,7 +33,7 @@ public class ElasticSearchConsumer extends RESTConsumer {
 	@Override public void setPosition(String logName, long logPosition) {
 		String data = "{\"logName\":\"" + logName.replaceAll("\"", "'") + "\",\"logPosition\":\"" + logPosition + "\"}";
 
-		this.indexRequest("log_position", "1", data, false);
+		this.indexRequest("log_position", "1", data, true);
 	}
 
 	@Override public void setPosition(long logPosition) {
