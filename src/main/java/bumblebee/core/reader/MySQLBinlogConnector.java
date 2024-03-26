@@ -45,21 +45,54 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 	}
 
 	@Override public void onEvent(com.github.shyiko.mysql.binlog.event.Event event) {
+		logger.info(event.toString());
 		try {
-			logger.info(event.toString());
 			if (event.getHeader().getEventType() == EventType.TABLE_MAP)
-				producer.mapTable(event.getData());
-			if (event.getHeader().getEventType() == EventType.EXT_WRITE_ROWS)
-				producer.transformInsert(event.getData(), (EventHeaderV4) event.getHeader());
-			if (event.getHeader().getEventType() == EventType.EXT_UPDATE_ROWS)
-				producer.transformUpdate(event.getData(), (EventHeaderV4) event.getHeader());
-			if (event.getHeader().getEventType() == EventType.EXT_DELETE_ROWS)
-				producer.transformDelete(event.getData(), (EventHeaderV4) event.getHeader());
-			if (event.getHeader().getEventType() == EventType.ROTATE)
-				producer.changePosition(event.getData());
+			producer.mapTable(event.getData());
 		} catch (BusinessException ex) {
 			ex.printStackTrace();
 			logger.severe(ex.getMessage());
+			logger.severe("Falha no evento: " + event.getHeader().getEventType())
+			disconnect();
+			throw new BusinessException(ex);
+		}
+		try {
+			if (event.getHeader().getEventType() == EventType.EXT_WRITE_ROWS)
+			producer.transformInsert(event.getData(), (EventHeaderV4) event.getHeader());
+		} catch (BusinessException ex) {
+			ex.printStackTrace();
+			logger.severe(ex.getMessage());
+			logger.severe("Falha no evento: " + event.getHeader().getEventType())
+			disconnect();
+			throw new BusinessException(ex);
+		}
+		try {
+			if (event.getHeader().getEventType() == EventType.EXT_UPDATE_ROWS)
+			producer.transformUpdate(event.getData(), (EventHeaderV4) event.getHeader());
+		} catch (BusinessException ex) {
+			ex.printStackTrace();
+			logger.severe(ex.getMessage());
+			logger.severe("Falha no evento: " + event.getHeader().getEventType())
+			disconnect();
+			throw new BusinessException(ex);
+		}
+		try {
+			if (event.getHeader().getEventType() == EventType.EXT_DELETE_ROWS)
+			producer.transformDelete(event.getData(), (EventHeaderV4) event.getHeader());
+		} catch (BusinessException ex) {
+			ex.printStackTrace();
+			logger.severe(ex.getMessage());
+			logger.severe("Falha no evento: " + event.getHeader().getEventType())
+			disconnect();
+			throw new BusinessException(ex);
+		}
+		try {
+			if (event.getHeader().getEventType() == EventType.ROTATE)
+			producer.changePosition(event.getData());
+		} catch (BusinessException ex) {
+			ex.printStackTrace();
+			logger.severe(ex.getMessage());
+			logger.severe("Falha no evento: " + event.getHeader().getEventType())
 			disconnect();
 			throw new BusinessException(ex);
 		}
@@ -69,6 +102,7 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 		try {
 			client.disconnect();
 		} catch (IOException e) {
+			logger.severe("Falha ao desconectar")
 			e.printStackTrace();
 		}
 	}
@@ -78,6 +112,7 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 			client.setKeepAlive(false);
 			client.connect();
 		} catch (IOException ex) {
+			logger.severe("Falha ao conectar")
 			throw new BusinessException(ex);
 		}
 	}

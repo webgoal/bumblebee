@@ -76,6 +76,7 @@ public class MySQLConsumer extends AbstractConsumer {
 			stmt.executeUpdate();
 			stmt.close();
 		} catch (SQLException e) {
+			logger.severe("Falha ao executar SQL")
 			throw new BusinessException(e);
 		}
 	}
