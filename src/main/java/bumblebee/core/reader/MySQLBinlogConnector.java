@@ -52,7 +52,7 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 		} catch (BusinessException ex) {
 			ex.printStackTrace();
 			logger.severe(ex.getMessage());
-			logger.severe("Falha no evento: " + event.getHeader().getEventType())
+			logger.severe("Falha no evento: " + event.getHeader().getEventType());
 			disconnect();
 			throw new BusinessException(ex);
 		}
@@ -62,7 +62,7 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 		} catch (BusinessException ex) {
 			ex.printStackTrace();
 			logger.severe(ex.getMessage());
-			logger.severe("Falha no evento: " + event.getHeader().getEventType())
+			logger.severe("Falha no evento: " + event.getHeader().getEventType());
 			disconnect();
 			throw new BusinessException(ex);
 		}
@@ -72,7 +72,7 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 		} catch (BusinessException ex) {
 			ex.printStackTrace();
 			logger.severe(ex.getMessage());
-			logger.severe("Falha no evento: " + event.getHeader().getEventType())
+			logger.severe("Falha no evento: " + event.getHeader().getEventType());
 			disconnect();
 			throw new BusinessException(ex);
 		}
@@ -82,7 +82,7 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 		} catch (BusinessException ex) {
 			ex.printStackTrace();
 			logger.severe(ex.getMessage());
-			logger.severe("Falha no evento: " + event.getHeader().getEventType())
+			logger.severe("Falha no evento: " + event.getHeader().getEventType());
 			disconnect();
 			throw new BusinessException(ex);
 		}
@@ -92,7 +92,7 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 		} catch (BusinessException ex) {
 			ex.printStackTrace();
 			logger.severe(ex.getMessage());
-			logger.severe("Falha no evento: " + event.getHeader().getEventType())
+			logger.severe("Falha no evento: " + event.getHeader().getEventType());
 			disconnect();
 			throw new BusinessException(ex);
 		}
@@ -102,7 +102,7 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 		try {
 			client.disconnect();
 		} catch (IOException e) {
-			logger.severe("Falha ao desconectar")
+			logger.severe("Falha ao desconectar");
 			e.printStackTrace();
 		}
 	}
@@ -112,7 +112,7 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 			client.setKeepAlive(false);
 			client.connect();
 		} catch (IOException ex) {
-			logger.severe("Falha ao conectar")
+			logger.severe("Falha ao conectar");
 			throw new BusinessException(ex);
 		}
 	}
