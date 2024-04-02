@@ -7,9 +7,9 @@ import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.exceptions.BusinessException;
 import bumblebee.core.util.MySQLConnectionManager;
 
-import com.github.shyiko.mysql.binlog.BinaryLogClient;
-import com.github.shyiko.mysql.binlog.event.EventHeaderV4;
-import com.github.shyiko.mysql.binlog.event.EventType;
+import com.zendesk.mysql.binlog.BinaryLogClient;
+import com.zendesk.mysql.binlog.event.EventHeaderV4;
+import com.zendesk.mysql.binlog.event.EventType;
 
 public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 	private BinaryLogClient client;
@@ -46,7 +46,7 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 		client.registerEventListener(this);
 	}
 
-	@Override public void onEvent(com.github.shyiko.mysql.binlog.event.Event event) {
+	@Override public void onEvent(com.zendesk.mysql.binlog.event.Event event) {
 		logger.info(event.toString());
 		try {
 			if (event.getHeader().getEventType() == EventType.TABLE_MAP)
