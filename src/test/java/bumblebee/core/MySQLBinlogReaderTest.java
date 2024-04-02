@@ -17,12 +17,12 @@ import bumblebee.core.aux.DummyConsumer;
 import bumblebee.core.interfaces.SchemaManager;
 import bumblebee.core.reader.MySQLBinlogAdapter;
 
-import com.zendesk.mysql.binlog.event.DeleteRowsEventData;
-import com.zendesk.mysql.binlog.event.EventHeaderV4;
-import com.zendesk.mysql.binlog.event.RotateEventData;
-import com.zendesk.mysql.binlog.event.TableMapEventData;
-import com.zendesk.mysql.binlog.event.UpdateRowsEventData;
-import com.zendesk.mysql.binlog.event.WriteRowsEventData;
+import com.github.shyiko.mysql.binlog.event.DeleteRowsEventData;
+import com.github.shyiko.mysql.binlog.event.EventHeaderV4;
+import com.github.shyiko.mysql.binlog.event.RotateEventData;
+import com.github.shyiko.mysql.binlog.event.TableMapEventData;
+import com.github.shyiko.mysql.binlog.event.UpdateRowsEventData;
+import com.github.shyiko.mysql.binlog.event.WriteRowsEventData;
 
 public class MySQLBinlogReaderTest {
 

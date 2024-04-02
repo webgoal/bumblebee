@@ -14,12 +14,12 @@ import bumblebee.core.interfaces.Consumer;
 import bumblebee.core.interfaces.Producer;
 import bumblebee.core.interfaces.SchemaManager;
 
-import com.zendesk.mysql.binlog.event.DeleteRowsEventData;
-import com.zendesk.mysql.binlog.event.EventHeaderV4;
-import com.zendesk.mysql.binlog.event.RotateEventData;
-import com.zendesk.mysql.binlog.event.TableMapEventData;
-import com.zendesk.mysql.binlog.event.UpdateRowsEventData;
-import com.zendesk.mysql.binlog.event.WriteRowsEventData;
+import com.github.shyiko.mysql.binlog.event.DeleteRowsEventData;
+import com.github.shyiko.mysql.binlog.event.EventHeaderV4;
+import com.github.shyiko.mysql.binlog.event.RotateEventData;
+import com.github.shyiko.mysql.binlog.event.TableMapEventData;
+import com.github.shyiko.mysql.binlog.event.UpdateRowsEventData;
+import com.github.shyiko.mysql.binlog.event.WriteRowsEventData;
 
 public class MySQLBinlogAdapter implements Producer {
 	private Consumer consumer;

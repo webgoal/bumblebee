@@ -19,8 +19,8 @@ import bumblebee.core.interfaces.Consumer;
 import bumblebee.core.interfaces.SchemaManager;
 import bumblebee.core.reader.MySQLBinlogAdapter;
 
-import com.zendesk.mysql.binlog.event.EventHeaderV4;
-import com.zendesk.mysql.binlog.event.WriteRowsEventData;
+import com.github.shyiko.mysql.binlog.event.EventHeaderV4;
+import com.github.shyiko.mysql.binlog.event.WriteRowsEventData;
 
 public class TransactionIntegrationTest {
 
