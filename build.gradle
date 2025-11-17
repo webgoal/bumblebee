@@ -33,6 +33,7 @@ dependencies {
   compile group: 'org.elasticsearch.client', name: 'transport', version: '7.9.0'
   compile 'org.elasticsearch.client:transport:7.9.0'
   compile 'org.apache.tika:tika-parsers:1.12'
+  compile 'com.amazonaws:aws-java-sdk-core:1.12.261'
 
   testCompile 'junit:junit:4.+'
   testCompile 'com.h2database:h2:1.4.187'
