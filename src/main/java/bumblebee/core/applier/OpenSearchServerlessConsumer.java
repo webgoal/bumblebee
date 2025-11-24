@@ -2,7 +2,6 @@ package bumblebee.core.applier;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -56,6 +55,7 @@ public class OpenSearchServerlessConsumer extends RESTConsumer {
 	}
 
 	@Override public LogPosition getCurrentLogPosition() {
+		logger.info("Entrou no getCurrentLogPosition");
 		try {
 			URL url = new URL(host + "/log_position/_doc/1");
 			HttpURLConnection connection = createSignedConnection(url, "GET", null);

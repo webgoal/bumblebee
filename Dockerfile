@@ -1,4 +1,4 @@
-FROM java:8
+FROM amazoncorretto:8
 RUN echo "America/Sao_Paulo" > /etc/timezone \
 && dpkg-reconfigure -f noninteractive tzdata
 RUN apt-get update && apt-get install -y --no-install-recommends cron nano
