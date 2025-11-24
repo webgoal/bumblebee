@@ -40,7 +40,7 @@ public class OpenSearchServerlessConsumer extends RESTConsumer {
 		this.credentialsProvider = new DefaultAWSCredentialsProviderChain();
 		
 		this.signer = new AWS4Signer();
-		this.signer.setServiceName("aoss"); // Amazon OpenSearch Serverless
+		this.signer.setServiceName("aoss"); 
 		this.signer.setRegionName(this.region);
 	}
 
@@ -55,14 +55,69 @@ public class OpenSearchServerlessConsumer extends RESTConsumer {
 	}
 
 	@Override public LogPosition getCurrentLogPosition() {
-		logger.info("Entrou no getCurrentLogPosition");
+		HttpURLConnection connection = null;
 		try {
 			URL url = new URL(host + "/log_position/_doc/1");
-			HttpURLConnection connection = createSignedConnection(url, "GET", null);
+			connection = createSignedConnection(url, "GET", null);
 			
-			BufferedReader in = new BufferedReader(
-				new InputStreamReader(connection.getInputStream())
-			);
+			
+			InputStream inputStream;
+			try {
+				inputStream = connection.getInputStream();
+			} catch (IOException e) {
+				int responseCode = connection.getResponseCode();
+				String responseMessage = connection.getResponseMessage();
+				
+				inputStream = connection.getErrorStream();
+				String errorBody = "";
+				if (inputStream != null) {
+					BufferedReader errorReader = new BufferedReader(new InputStreamReader(inputStream));
+					String line;
+					StringBuffer errorResponse = new StringBuffer();
+					while ((line = errorReader.readLine()) != null) {
+						errorResponse.append(line);
+					}
+					errorBody = errorResponse.toString();
+					errorReader.close();
+				}
+				
+				StringBuilder headersInfo = new StringBuilder();
+				headersInfo.append("=== HTTP RESPONSE HEADERS ===\n");
+				Map<String, java.util.List<String>> headerFields = connection.getHeaderFields();
+				if (headerFields != null) {
+					for (Map.Entry<String, java.util.List<String>> entry : headerFields.entrySet()) {
+						String headerName = entry.getKey() != null ? entry.getKey() : "Status";
+						String headerValue = entry.getValue() != null ? String.join(", ", entry.getValue()) : "";
+						headersInfo.append(headerName).append(": ").append(headerValue).append("\n");
+					}
+				}
+				
+				String errorDetails = String.format(
+					"=== ERRO HTTP %d ===\n" +
+					"URL: %s\n" +
+					"Response Code: %d\n" +
+					"Response Message: %s\n" +
+					"%s" +
+					"=== RESPONSE BODY ===\n" +
+					"%s\n" +
+					"===================",
+					responseCode,
+					url.toString(),
+					responseCode,
+					responseMessage,
+					headersInfo.toString(),
+					errorBody.isEmpty() ? "(vazio)" : errorBody
+				);
+				
+				logger.severe(errorDetails);
+				System.err.println(errorDetails);
+				
+				throw new RuntimeException("Request error at get logPosition: " + responseCode + " - " + responseMessage + 
+					"\nHeaders:\n" + headersInfo.toString() + 
+					"\nResponse Body: " + errorBody);
+			}
+			
+			BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
 
 			String inputLine;
 			StringBuffer stringResponse = new StringBuffer();
@@ -71,12 +126,50 @@ public class OpenSearchServerlessConsumer extends RESTConsumer {
 				stringResponse.append(inputLine);
 			}
 			in.close();
+			
+			int responseCode = connection.getResponseCode();
+			if (!(responseCode >= 200 && responseCode <= 299)) {
+				String responseMessage = connection.getResponseMessage();
+				String responseBody = stringResponse.toString();
+				
+				StringBuilder headersInfo = new StringBuilder();
+				headersInfo.append("=== HTTP RESPONSE HEADERS ===\n");
+				Map<String, java.util.List<String>> headerFields = connection.getHeaderFields();
+				if (headerFields != null) {
+					for (Map.Entry<String, java.util.List<String>> entry : headerFields.entrySet()) {
+						String headerName = entry.getKey() != null ? entry.getKey() : "Status";
+						String headerValue = entry.getValue() != null ? String.join(", ", entry.getValue()) : "";
+						headersInfo.append(headerName).append(": ").append(headerValue).append("\n");
+					}
+				}
+				
+				String errorDetails = String.format(
+					"=== ERRO HTTP %d ===\n" +
+					"URL: %s\n" +
+					"Response Code: %d\n" +
+					"Response Message: %s\n" +
+					"%s" +
+					"=== RESPONSE BODY ===\n" +
+					"%s\n" +
+					"===================",
+					responseCode,
+					url.toString(),
+					responseCode,
+					responseMessage,
+					headersInfo.toString(),
+					responseBody.isEmpty() ? "(vazio)" : responseBody
+				);
+				
+				logger.severe(errorDetails);
+				System.err.println(errorDetails);
+				
+				throw new RuntimeException("Request error at get logPosition: " + responseCode + " - " + responseMessage + 
+					"\nHeaders:\n" + headersInfo.toString() + 
+					"\nResponse Body: " + responseBody);
+			}
+			
 			JSONObject response = new JSONObject(stringResponse.toString());
 			response = response.getJSONObject("_source");
-
-			if (!(connection.getResponseCode() >= 200 && connection.getResponseCode() <= 299)) {
-				throw new RuntimeException("Request error at get logPosition: " + connection.getResponseMessage());
-			}
 
 			return new LogPosition(response.getString("logName"), Long.parseLong(response.getString("logPosition")));
 		} catch (RuntimeException e) {
@@ -86,7 +179,55 @@ public class OpenSearchServerlessConsumer extends RESTConsumer {
 			logger.severe(e.toString());
 			throw new BusinessException(e);
 		} catch (IOException e) {
-			logger.severe(e.toString());
+			if (connection != null) {
+				try {
+					int responseCode = connection.getResponseCode();
+					InputStream errorStream = connection.getErrorStream();
+					String errorBody = "";
+					if (errorStream != null) {
+						BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream));
+						String line;
+						StringBuffer errorResponse = new StringBuffer();
+						while ((line = errorReader.readLine()) != null) {
+							errorResponse.append(line);
+						}
+						errorBody = errorResponse.toString();
+						errorReader.close();
+					}
+					
+					StringBuilder headersInfo = new StringBuilder();
+					Map<String, java.util.List<String>> headerFields = connection.getHeaderFields();
+					if (headerFields != null) {
+						for (Map.Entry<String, java.util.List<String>> entry : headerFields.entrySet()) {
+							String headerName = entry.getKey() != null ? entry.getKey() : "Status";
+							String headerValue = entry.getValue() != null ? String.join(", ", entry.getValue()) : "";
+							headersInfo.append(headerName).append(": ").append(headerValue).append("\n");
+						}
+					}
+					
+					String errorDetails = String.format(
+						"=== ERRO IOException ===\n" +
+						"Response Code: %d\n" +
+						"Response Message: %s\n" +
+						"=== HEADERS ===\n" +
+						"%s" +
+						"=== RESPONSE BODY ===\n" +
+						"%s\n" +
+						"===================",
+						responseCode,
+						connection.getResponseMessage(),
+						headersInfo.toString(),
+						errorBody.isEmpty() ? "(vazio)" : errorBody
+					);
+					
+					logger.severe(errorDetails);
+					System.err.println(errorDetails);
+				} catch (Exception ex) {
+					logger.severe("Erro ao tentar ler detalhes do erro: " + ex.toString());
+				}
+			}
+			logger.severe("IOException: " + e.toString());
+			e.printStackTrace();
 			throw new BusinessException(e);
 		}
 	}
@@ -205,7 +346,6 @@ public class OpenSearchServerlessConsumer extends RESTConsumer {
 		connection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
 		connection.setRequestProperty("Accept", "application/json");
 
-		// Criar request para assinatura AWS
 		DefaultRequest<?> request = new DefaultRequest<>("aoss");
 		request.setHttpMethod(HttpMethodName.valueOf(method));
 		try {
@@ -215,27 +355,24 @@ public class OpenSearchServerlessConsumer extends RESTConsumer {
 		}
 		request.setResourcePath(url.getPath() + (url.getQuery() != null ? "?" + url.getQuery() : ""));
 
-		// Adicionar headers
 		request.addHeader("Content-Type", "application/json;charset=UTF-8");
 		request.addHeader("Accept", "application/json");
 
-		// Adicionar conteúdo se houver
 		if (content != null && !content.isEmpty()) {
 			byte[] contentBytes = content.getBytes(StandardCharsets.UTF_8);
 			request.setContent(new ByteArrayInputStream(contentBytes));
 			request.addHeader("Content-Length", String.valueOf(contentBytes.length));
 		}
 
-		// Assinar a requisição
 		try {
 			AWSCredentials credentials = credentialsProvider.getCredentials();
+			System.out.println("Access Key ID: " + credentials.getAWSAccessKeyId().substring(0, 4) + "...");
 			signer.sign(request, credentials);
 		} catch (Exception e) {
 			logger.severe("Erro ao assinar requisição: " + e.toString());
 			throw new BusinessException(e);
 		}
 
-		// Aplicar headers assinados na conexão
 		for (Map.Entry<String, String> entry : request.getHeaders().entrySet()) {
 			connection.setRequestProperty(entry.getKey(), entry.getValue());
 		}
