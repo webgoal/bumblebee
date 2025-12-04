@@ -1,26 +1,31 @@
 package bumblebee.core.applier;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-import java.io.*;
 
 import org.json.JSONObject;
+import org.opensearch.client.json.JsonData;
+import org.opensearch.client.opensearch.OpenSearchClient;
+import org.opensearch.client.opensearch._types.OpenSearchException;
+import org.opensearch.client.opensearch._types.Result;
+import org.opensearch.client.opensearch.core.GetRequest;
+import org.opensearch.client.opensearch.core.GetResponse;
+import org.opensearch.client.opensearch.core.UpdateRequest;
+import org.opensearch.client.opensearch.core.UpdateResponse;
+import org.opensearch.client.opensearch.core.DeleteRequest;
+import org.opensearch.client.opensearch.core.DeleteResponse;
+import org.opensearch.client.transport.aws.AwsSdk2Transport;
+import org.opensearch.client.transport.aws.AwsSdk2TransportOptions;
 
-import com.amazonaws.DefaultRequest;
-import com.amazonaws.auth.AWS4Signer;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.http.HttpMethodName;
 import com.google.gson.Gson;
+
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.http.SdkHttpClient;
+import software.amazon.awssdk.http.apache.ApacheHttpClient;
+import software.amazon.awssdk.regions.Region;
 
 import bumblebee.core.applier.MySQLPositionManager.LogPosition;
 import bumblebee.core.events.Event;
@@ -30,359 +35,229 @@ public class OpenSearchServerlessConsumer extends RESTConsumer {
 	private Logger logger;
 	private String host;
 	private String region;
-	private AWSCredentialsProvider credentialsProvider;
-	private AWS4Signer signer;
+	private OpenSearchClient client;
 
 	public OpenSearchServerlessConsumer(String opensearchHost, String region) {
 		logger = Logger.getLogger(getClass().getName());
 		this.host = opensearchHost;
 		this.region = region != null ? region : "us-east-1";
-		this.credentialsProvider = new DefaultAWSCredentialsProviderChain();
 		
-		this.signer = new AWS4Signer();
-		this.signer.setServiceName("aoss"); 
-		this.signer.setRegionName(this.region);
-	}
-
-	@Override public void setPosition(String logName, long logPosition) {
-		String data = "{\"logName\":\"" + logName.replaceAll("\"", "'") + "\",\"logPosition\":\"" + logPosition + "\"}";
-		this.indexRequest("log_position", "1", data, true);
-	}
-
-	@Override public void setPosition(long logPosition) {
-		String data = "{\"logPosition\":\"" + logPosition + "\"}";
-		this.indexRequest("log_position", "1", data, true);
-	}
-
-	@Override public LogPosition getCurrentLogPosition() {
-		HttpURLConnection connection = null;
 		try {
-			URL url = new URL(host + "/log_position/_doc/1");
-			connection = createSignedConnection(url, "GET", null);
+			SdkHttpClient httpClient = ApacheHttpClient.builder().build();
+			Region awsRegion = Region.of(this.region);
 			
+			AwsSdk2TransportOptions transportOptions = AwsSdk2TransportOptions.builder()
+				.build();
 			
-			InputStream inputStream;
-			try {
-				inputStream = connection.getInputStream();
-			} catch (IOException e) {
-				int responseCode = connection.getResponseCode();
-				String responseMessage = connection.getResponseMessage();
-				
-				inputStream = connection.getErrorStream();
-				String errorBody = "";
-				if (inputStream != null) {
-					BufferedReader errorReader = new BufferedReader(new InputStreamReader(inputStream));
-					String line;
-					StringBuffer errorResponse = new StringBuffer();
-					while ((line = errorReader.readLine()) != null) {
-						errorResponse.append(line);
-					}
-					errorBody = errorResponse.toString();
-					errorReader.close();
-				}
-				
-				StringBuilder headersInfo = new StringBuilder();
-				headersInfo.append("=== HTTP RESPONSE HEADERS ===\n");
-				Map<String, java.util.List<String>> headerFields = connection.getHeaderFields();
-				if (headerFields != null) {
-					for (Map.Entry<String, java.util.List<String>> entry : headerFields.entrySet()) {
-						String headerName = entry.getKey() != null ? entry.getKey() : "Status";
-						String headerValue = entry.getValue() != null ? String.join(", ", entry.getValue()) : "";
-						headersInfo.append(headerName).append(": ").append(headerValue).append("\n");
-					}
-				}
-				
-				String errorDetails = String.format(
-					"=== ERRO HTTP %d ===\n" +
-					"URL: %s\n" +
-					"Response Code: %d\n" +
-					"Response Message: %s\n" +
-					"%s" +
-					"=== RESPONSE BODY ===\n" +
-					"%s\n" +
-					"===================",
-					responseCode,
-					url.toString(),
-					responseCode,
-					responseMessage,
-					headersInfo.toString(),
-					errorBody.isEmpty() ? "(vazio)" : errorBody
-				);
-				
-				logger.severe(errorDetails);
-				System.err.println(errorDetails);
-				
-				throw new RuntimeException("Request error at get logPosition: " + responseCode + " - " + responseMessage + 
-					"\nHeaders:\n" + headersInfo.toString() + 
-					"\nResponse Body: " + errorBody);
-			}
+			this.client = new OpenSearchClient(
+				new AwsSdk2Transport(
+					httpClient,
+					opensearchHost,
+					"aoss",
+					awsRegion,
+					transportOptions
+				)
+			);
 			
-			BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
-
-			String inputLine;
-			StringBuffer stringResponse = new StringBuffer();
-
-			while ((inputLine = in.readLine()) != null) {
-				stringResponse.append(inputLine);
-			}
-			in.close();
-			
-			int responseCode = connection.getResponseCode();
-			if (!(responseCode >= 200 && responseCode <= 299)) {
-				String responseMessage = connection.getResponseMessage();
-				String responseBody = stringResponse.toString();
-				
-				StringBuilder headersInfo = new StringBuilder();
-				headersInfo.append("=== HTTP RESPONSE HEADERS ===\n");
-				Map<String, java.util.List<String>> headerFields = connection.getHeaderFields();
-				if (headerFields != null) {
-					for (Map.Entry<String, java.util.List<String>> entry : headerFields.entrySet()) {
-						String headerName = entry.getKey() != null ? entry.getKey() : "Status";
-						String headerValue = entry.getValue() != null ? String.join(", ", entry.getValue()) : "";
-						headersInfo.append(headerName).append(": ").append(headerValue).append("\n");
-					}
-				}
-				
-				String errorDetails = String.format(
-					"=== ERRO HTTP %d ===\n" +
-					"URL: %s\n" +
-					"Response Code: %d\n" +
-					"Response Message: %s\n" +
-					"%s" +
-					"=== RESPONSE BODY ===\n" +
-					"%s\n" +
-					"===================",
-					responseCode,
-					url.toString(),
-					responseCode,
-					responseMessage,
-					headersInfo.toString(),
-					responseBody.isEmpty() ? "(vazio)" : responseBody
-				);
-				
-				logger.severe(errorDetails);
-				System.err.println(errorDetails);
-				
-				throw new RuntimeException("Request error at get logPosition: " + responseCode + " - " + responseMessage + 
-					"\nHeaders:\n" + headersInfo.toString() + 
-					"\nResponse Body: " + responseBody);
-			}
-			
-			JSONObject response = new JSONObject(stringResponse.toString());
-			response = response.getJSONObject("_source");
-
-			return new LogPosition(response.getString("logName"), Long.parseLong(response.getString("logPosition")));
-		} catch (RuntimeException e) {
-			logger.severe(e.toString());
-			throw new BusinessException(e);
-		} catch (MalformedURLException e) {
-			logger.severe(e.toString());
-			throw new BusinessException(e);
-		} catch (IOException e) {
-			if (connection != null) {
-				try {
-					int responseCode = connection.getResponseCode();
-					InputStream errorStream = connection.getErrorStream();
-					String errorBody = "";
-					if (errorStream != null) {
-						BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream));
-						String line;
-						StringBuffer errorResponse = new StringBuffer();
-						while ((line = errorReader.readLine()) != null) {
-							errorResponse.append(line);
-						}
-						errorBody = errorResponse.toString();
-						errorReader.close();
-					}
-					
-					StringBuilder headersInfo = new StringBuilder();
-					Map<String, java.util.List<String>> headerFields = connection.getHeaderFields();
-					if (headerFields != null) {
-						for (Map.Entry<String, java.util.List<String>> entry : headerFields.entrySet()) {
-							String headerName = entry.getKey() != null ? entry.getKey() : "Status";
-							String headerValue = entry.getValue() != null ? String.join(", ", entry.getValue()) : "";
-							headersInfo.append(headerName).append(": ").append(headerValue).append("\n");
-						}
-					}
-					
-					String errorDetails = String.format(
-						"=== ERRO IOException ===\n" +
-						"Response Code: %d\n" +
-						"Response Message: %s\n" +
-						"=== HEADERS ===\n" +
-						"%s" +
-						"=== RESPONSE BODY ===\n" +
-						"%s\n" +
-						"===================",
-						responseCode,
-						connection.getResponseMessage(),
-						headersInfo.toString(),
-						errorBody.isEmpty() ? "(vazio)" : errorBody
-					);
-					
-					logger.severe(errorDetails);
-					System.err.println(errorDetails);
-				} catch (Exception ex) {
-					logger.severe("Erro ao tentar ler detalhes do erro: " + ex.toString());
-				}
-			}
-			logger.severe("IOException: " + e.toString());
+			logger.info("OpenSearch Serverless client initialized successfully");
+		} catch (Exception e) {
+			logger.severe("Erro ao inicializar cliente OpenSearch Serverless: " + e.toString());
 			e.printStackTrace();
 			throw new BusinessException(e);
 		}
 	}
 
-	@Override protected void insert(Event event) {
-		logger.info("Insert: ns = " + event.getNamespace() + ", collection: " + event.getCollection() + " valid: " + event.isInsert() + " id: " + event.getData().get("id"));
+	@Override
+	public void setPosition(String logName, long logPosition) {
+		Map<String, Object> data = new HashMap<>();
+		data.put("logName", logName);
+		data.put("logPosition", logPosition);
+		this.indexRequest("log_position", "1", data, true);
+	}
+
+	@Override
+	public void setPosition(long logPosition) {
+		Map<String, Object> data = new HashMap<>();
+		data.put("logPosition", logPosition);
+		this.indexRequest("log_position", "1", data, true);
+	}
+
+	@Override
+	public LogPosition getCurrentLogPosition() {
+		try {
+			GetRequest getRequest = GetRequest.of(g -> g
+				.index("log_position")
+				.id("1")
+			);
+			
+			GetResponse<JsonData> response = client.get(getRequest, JsonData.class);
+			
+			if (!response.found()) {
+				logger.warning("Log position not found, returning default");
+				return new LogPosition("", 0L);
+			}
+			
+			JsonData source = response.source();
+			JSONObject jsonSource = new JSONObject(source.toString());
+			
+			String logName = jsonSource.optString("logName", "");
+			long logPosition = jsonSource.optLong("logPosition", 0L);
+			
+			return new LogPosition(logName, logPosition);
+		} catch (OpenSearchException e) {
+			logger.severe("OpenSearch error getting log position: " + e.toString());
+			if (e.status() == 404) {
+				logger.warning("Log position not found, returning default");
+				return new LogPosition("", 0L);
+			}
+			throw new BusinessException(e);
+		} catch (IOException e) {
+			logger.severe("IOException getting log position: " + e.toString());
+			e.printStackTrace();
+			throw new BusinessException(e);
+		}
+	}
+
+	@Override
+	protected void insert(Event event) {
+		logger.info("Insert: ns = " + event.getNamespace() + ", collection: " + event.getCollection() 
+			+ " valid: " + event.isInsert() + " id: " + event.getData().get("id"));
 		this.indexItem(event.getCollection(), event.getData().get("id").toString(), event.getData(), false);
 	}
 
-	@Override protected void update(Event event) {
-		logger.info("Update: ns: " + event.getNamespace() + ", collection: " + event.getCollection() + " valid: " + event.isUpdate() + " id: " + event.getData().get("id"));
+	@Override
+	protected void update(Event event) {
+		logger.info("Update: ns: " + event.getNamespace() + ", collection: " + event.getCollection() 
+			+ " valid: " + event.isUpdate() + " id: " + event.getData().get("id"));
 		this.indexItem(event.getCollection(), event.getData().get("id").toString(), event.getData(), true);
 	}
 
-	@Override protected void delete(Event event) {
-		logger.warning("Delete: ns = " + event.getNamespace() + ", collection: " + event.getCollection() + " valid: " + event.isDelete() + " id: " + event.getConditions().get("id"));
+	@Override
+	protected void delete(Event event) {
+		logger.warning("Delete: ns = " + event.getNamespace() + ", collection: " + event.getCollection() 
+			+ " valid: " + event.isDelete() + " id: " + event.getConditions().get("id"));
 		this.deleteIndexedItem(event.getCollection(), event.getConditions().get("id").toString());
 	}
 
-	private void indexItem(String index, String id, Map<String, Object> content, Boolean isUpdate ) {
-		Map<String, String> stringContent = new HashMap<String, String>();
+	private void indexItem(String index, String id, Map<String, Object> content, Boolean isUpdate) {
+		Map<String, Object> processedContent = new HashMap<>();
 
 		for (Map.Entry<String, Object> entry : content.entrySet()) {
-		    String key = entry.getKey();
-		    Object value = entry.getValue();
+			String key = entry.getKey();
+			Object value = entry.getValue();
 
-		    if (value != null && !value.equals("")) {
-					
-		    	if (value.getClass() == java.util.Date.class) {
-			    	value = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(value);
-			    }
+			if (value != null && !value.equals("")) {
+				if (value.getClass() == java.util.Date.class) {
+					value = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(value);
+				}
 
-					if (key.toString().equals("edital_tem")) {
-						if(value.toString().equals("0")) value = false;
-						if(value.toString().equals("1")) value = true;
-					}
+				if (key.toString().equals("edital_tem")) {
+					if (value.toString().equals("0"))
+						value = false;
+					if (value.toString().equals("1"))
+						value = true;
+				}
 
-			    stringContent.put(key.toString(), value.toString());
-		    }
+				// Preservar tipos: números como números, booleans como booleans, etc
+				processedContent.put(key.toString(), value);
+			}
 		}
 
-		Gson gson = new Gson();
-		String data = gson.toJson(stringContent);
-
-		this.indexRequest(index, id, data, isUpdate);
+		this.indexRequest(index, id, processedContent, isUpdate);
 	}
 
-	private void indexRequest(String index, String id, String content, Boolean isUpdate) {
-		try{
-			String method;
-			String urlString;
-			String contentForRequest;
+	private void indexRequest(String index, String id, Map<String, Object> content, Boolean isUpdate) {
+		try {
+			UpdateRequest<JsonData, JsonData> updateRequest = UpdateRequest.of(u -> u
+				.index(index)
+				.id(id)
+				.doc(JsonData.of(content))
+				.docAsUpsert(true)
+			);
 
-			if (isUpdate) {
-				method = "POST";
-				urlString = host + "/" + index + "/_update/" + id;
-				contentForRequest = "{ \"doc\":" + content + "}";	
+			System.out.println("Indexando " + index + ": " + id + " com conteudo: " + content);
+
+			UpdateResponse<JsonData> response = client.update(updateRequest, JsonData.class);
+			
+			if (response.result() == Result.Created || response.result() == Result.Updated) {
+				logger.info("Documento indexado com sucesso: " + index + "/" + id + " - Result: " + response.result());
 			} else {
-				method = "PUT";
-				urlString = host + "/" + index + "/_create/" + id;
-				contentForRequest = content;
+				logger.warning("Resultado inesperado ao indexar: " + index + "/" + id + " - Result: " + response.result());
 			}
-		
-			URL url = new URL(urlString);
-			contentForRequest = this.removeMarks(contentForRequest);
-
-			HttpURLConnection connection = createSignedConnection(url, method, contentForRequest);
-
-			System.out.println("Indexando " + index + ": " + id + " com conteudo: " + contentForRequest);	
-
-			if (contentForRequest != null && !contentForRequest.isEmpty()) {
-				OutputStreamWriter osw = new OutputStreamWriter(connection.getOutputStream(), StandardCharsets.UTF_8);
-				osw.write(contentForRequest);
-				osw.flush();
-				osw.close();
-			}
-
-			if (isUpdate && connection.getResponseCode() >= 404) {
-				this.indexRequest(index, id, content, false);
-				return;
-			}
-
-			if (!(connection.getResponseCode() >= 200 && connection.getResponseCode() <= 299)) {
-				throw new RuntimeException("Request error at id " + id + ": " + connection.getResponseMessage());
-			}
-		} catch (MalformedURLException e) {
-			logger.severe(e.toString());
+		} catch (OpenSearchException e) {
+			String errorDetails = String.format(
+				"=== ERRO OpenSearch ao indexar ===\n" +
+				"Index: %s\n" +
+				"ID: %s\n" +
+				"Status: %d\n" +
+				"Error: %s\n" +
+				"===================",
+				index, id, e.status(), e.getMessage()
+			);
+			logger.severe(errorDetails);
+			System.err.println(errorDetails);
 			throw new BusinessException(e);
 		} catch (IOException e) {
-			logger.severe(e.toString());
+			String errorDetails = String.format(
+				"=== ERRO IOException ao indexar ===\n" +
+				"Index: %s\n" +
+				"ID: %s\n" +
+				"Error: %s\n" +
+				"===================",
+				index, id, e.getMessage()
+			);
+			logger.severe(errorDetails);
+			System.err.println(errorDetails);
+			e.printStackTrace();
+			throw new BusinessException(e);
+		} catch (Exception e) {
+			String errorDetails = String.format(
+				"=== ERRO ao indexar ===\n" +
+				"Index: %s\n" +
+				"ID: %s\n" +
+				"Error: %s\n" +
+				"===================",
+				index, id, e.getMessage()
+			);
+			logger.severe(errorDetails);
+			System.err.println(errorDetails);
+			e.printStackTrace();
 			throw new BusinessException(e);
 		}
 	}
 
 	private void deleteIndexedItem(String index, String id) {
-		try{
-			URL url = new URL(host + "/" + index + "/_doc/" + id);
-			HttpURLConnection connection = createSignedConnection(url, "DELETE", null);
+		try {
+			DeleteRequest deleteRequest = DeleteRequest.of(d -> d
+				.index(index)
+				.id(id)
+			);
 
-			if (!(connection.getResponseCode() >= 200 && connection.getResponseCode() <= 299) && connection.getResponseCode() != 404) {
-				throw new RuntimeException("Request error at id " + id + ": " + connection.getResponseCode() + connection.getResponseMessage());
+			DeleteResponse response = client.delete(deleteRequest);
+
+			if (response.result() == Result.Deleted) {
+				logger.info("Documento deletado com sucesso: " + index + "/" + id);
+			} else if (response.result() == Result.NotFound) {
+				logger.warning("Documento não encontrado para deletar: " + index + "/" + id);
+			} else {
+				logger.warning("Resultado inesperado ao deletar: " + index + "/" + id + " - Result: " + response.result());
 			}
-		} catch (MalformedURLException e) {
-			logger.severe(e.toString());
+		} catch (OpenSearchException e) {
+			if (e.status() == 404) {
+				logger.warning("Documento não encontrado para deletar: " + index + "/" + id);
+				return; // Não é erro se não existir
+			}
+			logger.severe("Erro OpenSearch ao deletar: " + e.toString());
 			throw new BusinessException(e);
 		} catch (IOException e) {
-			logger.severe(e.toString());
+			logger.severe("Erro IOException ao deletar: " + e.toString());
+			e.printStackTrace();
 			throw new BusinessException(e);
 		}
 	}
 
-	private HttpURLConnection createSignedConnection(URL url, String method, String content) throws IOException {
-		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		connection.setRequestMethod(method);
-		connection.setDoOutput(true);
-		connection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
-		connection.setRequestProperty("Accept", "application/json");
-
-		DefaultRequest<?> request = new DefaultRequest<>("aoss");
-		request.setHttpMethod(HttpMethodName.valueOf(method));
-		try {
-			request.setEndpoint(url.toURI());
-		} catch (java.net.URISyntaxException e) {
-			throw new IOException("Invalid URL: " + url.toString(), e);
-		}
-		request.setResourcePath(url.getPath() + (url.getQuery() != null ? "?" + url.getQuery() : ""));
-
-		request.addHeader("Content-Type", "application/json;charset=UTF-8");
-		request.addHeader("Accept", "application/json");
-
-		if (content != null && !content.isEmpty()) {
-			byte[] contentBytes = content.getBytes(StandardCharsets.UTF_8);
-			request.setContent(new ByteArrayInputStream(contentBytes));
-			request.addHeader("Content-Length", String.valueOf(contentBytes.length));
-		}
-
-		try {
-			AWSCredentials credentials = credentialsProvider.getCredentials();
-			System.out.println("Access Key ID: " + credentials.getAWSAccessKeyId().substring(0, 4) + "...");
-			signer.sign(request, credentials);
-		} catch (Exception e) {
-			logger.severe("Erro ao assinar requisição: " + e.toString());
-			throw new BusinessException(e);
-		}
-
-		for (Map.Entry<String, String> entry : request.getHeaders().entrySet()) {
-			connection.setRequestProperty(entry.getKey(), entry.getValue());
-		}
-
-		return connection;
-	}
-
-	public String removeMarks(String content){
+	public String removeMarks(String content) {
 		String regex = "(\\n)|(\\r)|(\\t)";
 		return content.replaceAll(regex, " ").replaceAll(" +", " ");
 	}
 }
-
