@@ -15,20 +15,22 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 	private BinaryLogClient client;
 	private MySQLBinlogAdapter producer;
 	private Logger logger;
+	private long serverId;
 
 	public MySQLBinlogConnector(MySQLBinlogAdapter producer, LogPosition logPosition, long serverId) {
 		logger = Logger.getLogger(getClass().getName());
 		this.producer = producer;
+		this.serverId = serverId;
 		client = new BinaryLogClient(MySQLConnectionManager.getProducerHost(), MySQLConnectionManager.getProducerPort(), null, MySQLConnectionManager.getProducerUser(), MySQLConnectionManager.getProducerPass());
 		client.setServerId(serverId);
 		client.setBinlogFilename(logPosition.getFilename());
 		client.setBinlogPosition(logPosition.getPosition());
 		client.registerLifecycleListener(new BinaryLogClient.LifecycleListener() {
 			@Override public void onConnect(BinaryLogClient client) {
-				logger.info("Conectou!");
+				logger.info("Conectou ao MySQL binlog com serverId: " + serverId);
 			}
 			@Override public void onDisconnect(BinaryLogClient client) {
-				logger.info("Desconectou!");
+				logger.info("Desconectou do MySQL binlog (serverId: " + serverId + ")");
 			}
 			@Override public void onEventDeserializationFailure(BinaryLogClient client, Exception ex) {
 				logger.severe("Falha na desserialização!");
@@ -44,6 +46,12 @@ public class MySQLBinlogConnector implements BinaryLogClient.EventListener {
 			}
 		});
 		client.registerEventListener(this);
+		
+		// Registrar shutdown hook para desconectar corretamente ao encerrar
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			logger.info("Shutdown hook: desconectando do MySQL binlog...");
+			disconnect();
+		}));
 	}
 
 	@Override public void onEvent(com.github.shyiko.mysql.binlog.event.Event event) {

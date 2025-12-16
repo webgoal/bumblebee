@@ -49,10 +49,17 @@ public class OpenSearchServerlessConsumer extends RESTConsumer {
 			AwsSdk2TransportOptions transportOptions = AwsSdk2TransportOptions.builder()
 				.build();
 			
+			String endpoint = opensearchHost;
+			if (endpoint.startsWith("https://")) {
+				endpoint = endpoint.substring(8);
+			} else if (endpoint.startsWith("http://")) {
+				endpoint = endpoint.substring(7);
+			}
+
 			this.client = new OpenSearchClient(
 				new AwsSdk2Transport(
 					httpClient,
-					opensearchHost,
+					endpoint,
 					"aoss",
 					awsRegion,
 					transportOptions
