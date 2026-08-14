@@ -2,8 +2,11 @@ package bumblebee.core.applier;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.json.JSONObject;
@@ -32,6 +35,10 @@ import bumblebee.core.events.Event;
 import bumblebee.core.exceptions.BusinessException;
 
 public class OpenSearchServerlessConsumer extends RESTConsumer {
+	private static final Set<String> BOOLEAN_FIELDS = new HashSet<>(Arrays.asList(
+		"edital_tem", "garantia_proposta", "garantia_contrato"
+	));
+
 	private Logger logger;
 	private String host;
 	private String region;
@@ -158,11 +165,8 @@ public class OpenSearchServerlessConsumer extends RESTConsumer {
 					value = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(value);
 				}
 
-				if (key.toString().equals("edital_tem")) {
-					if (value.toString().equals("0"))
-						value = false;
-					if (value.toString().equals("1"))
-						value = true;
+				if (BOOLEAN_FIELDS.contains(key.toString())) {
+					value = toOpenSearchBoolean(value);
 				}
 
 				// Preservar tipos: números como números, booleans como booleans, etc
@@ -266,5 +270,26 @@ public class OpenSearchServerlessConsumer extends RESTConsumer {
 	public String removeMarks(String content) {
 		String regex = "(\\n)|(\\r)|(\\t)";
 		return content.replaceAll(regex, " ").replaceAll(" +", " ");
+	}
+
+	private Object toOpenSearchBoolean(Object value) {
+		if (value instanceof Boolean) {
+			return value;
+		}
+		if (value instanceof Number) {
+			return ((Number) value).intValue() != 0;
+		}
+		if (value instanceof byte[]) {
+			byte[] bytes = (byte[]) value;
+			return bytes.length > 0 && bytes[0] != 0;
+		}
+		String asString = value.toString();
+		if ("0".equals(asString) || "false".equalsIgnoreCase(asString)) {
+			return false;
+		}
+		if ("1".equals(asString) || "true".equalsIgnoreCase(asString)) {
+			return true;
+		}
+		return value;
 	}
 }

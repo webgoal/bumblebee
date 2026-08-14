@@ -1,8 +1,11 @@
 package bumblebee.core.applier;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import org.json.JSONObject;
 
@@ -22,6 +25,10 @@ import bumblebee.core.events.Event;
 import bumblebee.core.exceptions.BusinessException;
 
 public class ElasticSearchConsumer extends RESTConsumer {
+	private static final Set<String> BOOLEAN_FIELDS = new HashSet<>(Arrays.asList(
+		"edital_tem", "garantia_proposta", "garantia_contrato"
+	));
+
 	private Logger logger;
 	private String host;
 
@@ -107,7 +114,7 @@ public class ElasticSearchConsumer extends RESTConsumer {
 			    	value = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(value);
 			    }
 
-					if (key.toString().equals("edital_tem")) {
+					if (BOOLEAN_FIELDS.contains(key.toString())) {
 						if(value.toString().equals("0")) value = false;
 						if(value.toString().equals("1")) value = true;
 					}
